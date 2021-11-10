@@ -27,7 +27,7 @@ tasks.withType<KotlinCompile>() {
 compose.desktop {
     application {
         // TODO : change main class
-        mainClass = "MainKt"
+        mainClass = "MainAppKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "detector"
