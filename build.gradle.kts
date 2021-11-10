@@ -4,10 +4,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0-beta6-dev446"
+    id("org.jetbrains.compose") version "1.0.0-beta6-dev450"
 }
 
-group = "me.fabian"
+group = "com.s452635"
 version = "1.0"
 
 repositories {
@@ -26,6 +26,7 @@ tasks.withType<KotlinCompile>() {
 
 compose.desktop {
     application {
+        // TODO : change main class
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
