@@ -1,3 +1,5 @@
+package com.s452635.detector
+
 import java.lang.Thread.sleep
 
 class Generator(

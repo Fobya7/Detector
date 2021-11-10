@@ -1,4 +1,5 @@
-import androidx.compose.desktop.DesktopMaterialTheme
+package com.s452635.detector
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme

@@ -30,7 +30,7 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Detector"
+            packageName = "detector"
             packageVersion = "1.0.0"
         }
     }
