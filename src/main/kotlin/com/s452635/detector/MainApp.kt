@@ -13,41 +13,41 @@ import java.lang.Thread.sleep
 fun main() = application {
     val applicationState = remember { ApplicationState() }
     DetectorWindow( applicationState.detector.value )
-    DialogWindow( applicationState.dialog.value )
-
+    GeneratorWindow( applicationState.dialog.value )
 }
 
 private class ApplicationState
 {
     // variables
+    var isGeneratorOpen = mutableStateOf( false )
+    fun closeGenerator() { isGeneratorOpen.value = false }
+    fun openGenerator() { isGeneratorOpen.value = true }
+
     var isDialogOpen = mutableStateOf( false )
-    fun closeDialog() { isDialogOpen.value = false }
-    fun openDialog() { isDialogOpen.value = true }
     var itChanges = mutableStateOf( 0 )
 
     // windows
     val detector = mutableStateOf( detectorState() )
     val dialog = mutableStateOf( dialogState() )
-    val isFileChooserVisible = mutableStateOf( false )
 
     fun readFromFile()
     {
-        // TODO : disable main window while picking file
+        isDialogOpen.value = true
         filePickingDialog()
-        // TODO : think
-        // do not import entire file - read it line by line
-        // cause it could be huge
+        isDialogOpen.value = false
     }
 
     private fun detectorState(
     ) = DetectorState(
-        readFromFile = ::readFromFile
+        readFromFile = ::readFromFile,
+        liveGenerate = ::openGenerator,
+        isBusy = isDialogOpen
     )
 
     private fun dialogState(
-    ) = DialogState(
-        isVisible = isDialogOpen,
-        close = ::closeDialog,
+    ) = GeneratorState(
+        isVisible = isGeneratorOpen,
+        close = ::closeGenerator,
         randomInt = itChanges
     )
 
@@ -71,7 +71,9 @@ private class ApplicationState
 }
 
 private class DetectorState(
-    val readFromFile: () -> Unit
+    val readFromFile: () -> Unit,
+    val liveGenerate: () -> Unit,
+    var isBusy: MutableState<Boolean>
 )
 
 @Composable
@@ -80,6 +82,7 @@ private fun ApplicationScope.DetectorWindow (
 ) = Window (
     onCloseRequest = ::exitApplication,
     title = "GearSym2000",
+    enabled = !detectorState.isBusy.value,
     state = WindowState(
         position = WindowPosition( Alignment.Center ),
         size = DpSize.Unspecified
@@ -87,28 +90,29 @@ private fun ApplicationScope.DetectorWindow (
     )
 {
     DetectorContent(
-        readFromFile = detectorState.readFromFile
+        readFromFile = detectorState.readFromFile,
+        liveGenerate = detectorState.liveGenerate
     )
 }
 
-private class DialogState(
+private class GeneratorState(
     var isVisible: MutableState<Boolean>,
     val close: () -> Unit,
     var randomInt : MutableState<Int>
 )
 
 @Composable
-private fun DialogWindow (
-    dialogState : DialogState
+private fun GeneratorWindow (
+    generatorState : GeneratorState
 ) = Window (
-    visible = dialogState.isVisible.value,
-    onCloseRequest = { dialogState.close() },
-    title = "dialog",
+    visible = generatorState.isVisible.value,
+    onCloseRequest = { generatorState.close() },
+    title = "Generator",
     state = WindowState(
         position = WindowPosition( Alignment.Center ),
         size = DpSize( 300.dp, 200.dp )
         )
     )
 {
-    DialogContent( dialogState.randomInt )
+    GeneratorContent( generatorState.randomInt )
 }

@@ -15,7 +15,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @Preview
-fun DetectorContent( readFromFile: () -> Unit )
+fun DetectorContent(
+    readFromFile: () -> Unit,
+    liveGenerate: () -> Unit
+)
 {
     var selectedOption by remember { mutableStateOf(StartOption.ReadFromFile) }
 
@@ -23,7 +26,7 @@ fun DetectorContent( readFromFile: () -> Unit )
     {
         when( selectedOption )
         {
-            StartOption.LiveGeneration -> {} // TODO : hook up live gen
+            StartOption.LiveGeneration -> { liveGenerate() }
             StartOption.ReadFromFile -> { readFromFile() }
         }
     }
@@ -82,7 +85,6 @@ fun DetectorContent( readFromFile: () -> Unit )
 
     } }
 }
-
 
 
 enum class StartOption( val optionString: String )

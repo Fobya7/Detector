@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 
 @Composable
-fun DialogContent( randomInt : MutableState<Int> )
+fun GeneratorContent(randomInt : MutableState<Int> )
 {
     MaterialTheme {
         Text( randomInt.value.toString() )
