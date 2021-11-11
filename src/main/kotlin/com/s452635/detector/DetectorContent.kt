@@ -15,9 +15,18 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @Preview
-fun DetectorContent(openDialog: () -> Unit )
+fun DetectorContent( readFromFile: () -> Unit )
 {
     var selectedOption by remember { mutableStateOf(StartOption.ReadFromFile) }
+
+    fun clickedButtonStart()
+    {
+        when( selectedOption )
+        {
+            StartOption.LiveGeneration -> {} // TODO : hook up live gen
+            StartOption.ReadFromFile -> { readFromFile() }
+        }
+    }
 
     MaterialTheme { Column(
         modifier = Modifier
@@ -40,7 +49,7 @@ fun DetectorContent(openDialog: () -> Unit )
         {
 
             Button(
-                onClick = { openDialog() },
+                onClick = { clickedButtonStart() },
                 content = { Text( "start" ) },
                 colors = ButtonDefaults.buttonColors( backgroundColor = colorPrimary ),
                 modifier = Modifier
@@ -73,6 +82,8 @@ fun DetectorContent(openDialog: () -> Unit )
 
     } }
 }
+
+
 
 enum class StartOption( val optionString: String )
 {
