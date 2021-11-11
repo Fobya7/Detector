@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @Preview
-fun DetectorApp( openDialog: () -> Unit )
+fun DetectorContent(openDialog: () -> Unit )
 {
     var selectedOption by remember { mutableStateOf(StartOption.ReadFromFile) }
 
@@ -40,7 +40,7 @@ fun DetectorApp( openDialog: () -> Unit )
         {
 
             Button(
-                onClick = { openDialog },
+                onClick = { openDialog() },
                 content = { Text( "start" ) },
                 colors = ButtonDefaults.buttonColors( backgroundColor = colorPrimary ),
                 modifier = Modifier
