@@ -1,93 +1,12 @@
 package com.s452635.detector
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 
 @Composable
-@Preview
-fun DetectorContent(
-    readFromFile: () -> Unit,
-    liveGenerate: () -> Unit
-)
+fun DetectorContent()
 {
-    var selectedOption by remember { mutableStateOf(StartOption.ReadFromFile) }
-
-    fun clickedButtonStart()
-    {
-        when( selectedOption )
-        {
-            StartOption.LiveGeneration -> { liveGenerate() }
-            StartOption.ReadFromFile -> { readFromFile() }
-        }
+    MainColumn {
+        Text( "it's the detector" )
     }
-
-    MaterialTheme { Column(
-        modifier = Modifier
-            .wrapContentSize()
-            .padding(15.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-        )
-    {
-
-        Box(
-            modifier = Modifier
-                .border( 2.dp, MyColors.BorderGray, shape = MyShapes.ShapeRounded )
-        ) {
-        Row(
-            modifier = Modifier
-                .height( IntrinsicSize.Max )
-                .padding( 10.dp )
-        )
-        {
-
-            Button(
-                onClick = { clickedButtonStart() },
-                content = { Text( "start" ) },
-                colors = ButtonDefaults.buttonColors( backgroundColor = MyColors.Primary ),
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .background( shape = MyShapes.ShapeRounded, color = MyColors.Primary )
-                )
-
-            Column(
-                horizontalAlignment = Alignment.Start
-            ) {
-            StartOption.values().forEach {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding( 2.dp )
-                    .height( IntrinsicSize.Max )
-                )
-            {
-                RadioButton(
-                    selected = it == selectedOption,
-                    colors = RadioButtonDefaults.colors( selectedColor = MyColors.Primary ),
-                    interactionSource = MutableInteractionSource(),
-                    onClick = { selectedOption = it },
-                    modifier = Modifier.height( 20.dp )
-                    )
-                Text( text = it.optionString )
-            } } }
-
-        } }
-
-    } }
 }
-
-
-enum class StartOption( val optionString: String )
-{
-    LiveGeneration( "use live generator" ),
-    ReadFromFile( "read from file" )
-}
-

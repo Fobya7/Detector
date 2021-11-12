@@ -6,113 +6,75 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
-import java.lang.Thread.sleep
 
 fun main() = application {
     val applicationState = remember { ApplicationState() }
-    DetectorWindow( applicationState.detector.value )
-    GeneratorWindow( applicationState.dialog.value )
+    DetectorWindow( applicationState.detectorSt.value )
+    GeneratorWindow( applicationState.generatorSt.value )
 }
 
 private class ApplicationState
 {
-    // variables
+    var isBusy = mutableStateOf( false )
+
     var isGeneratorOpen = mutableStateOf( false )
-    fun closeGenerator() { isGeneratorOpen.value = false }
     fun openGenerator() { isGeneratorOpen.value = true }
-
-    var isDialogOpen = mutableStateOf( false )
-    var itChanges = mutableStateOf( 0 )
-
-    // windows
-    val detector = mutableStateOf( detectorState() )
-    val dialog = mutableStateOf( dialogState() )
-
-    fun readFromFile()
+    fun closeGenerator() { isGeneratorOpen.value = false }
+    fun initGenerator()
     {
-        isDialogOpen.value = true
-        filePickingDialog()
-        isDialogOpen.value = false
+        openGenerator()
+        // TODO initiating stuff
     }
 
-    private fun detectorState(
-    ) = DetectorState(
-        readFromFile = ::readFromFile,
-        liveGenerate = ::openGenerator,
-        isBusy = isDialogOpen
+    var detectorSt = mutableStateOf( detectorState() )
+    private fun detectorState() = DetectorState(
+        isAppBusy = isBusy
     )
 
-    private fun dialogState(
-    ) = GeneratorState(
-        isVisible = isGeneratorOpen,
-        close = ::closeGenerator,
-        randomInt = itChanges
+    var generatorSt = mutableStateOf( generatorState() )
+    private fun generatorState() = GeneratorState(
+        isAppBusy = isBusy,
+        isOpen = isGeneratorOpen
     )
-
-    init
-    {
-        val thread1 = Thread {
-            while( true )
-            {
-                sleep( 200 )
-                itChanges.value += 1
-            }
-        }
-        val thread2 = Thread {
-            println( "2 > started" )
-            sleep( 3000 )
-            println( "2 > finished" )
-        }
-        // thread1.start()
-        // thread2.start()
-    }
 }
 
-private class DetectorState(
-    val readFromFile: () -> Unit,
-    val liveGenerate: () -> Unit,
-    var isBusy: MutableState<Boolean>
+private class DetectorState (
+    var isAppBusy: MutableState<Boolean>
 )
-
 @Composable
-private fun ApplicationScope.DetectorWindow (
-    detectorState: DetectorState
+private fun ApplicationScope.DetectorWindow(
+    detectorState : DetectorState
 ) = Window (
     onCloseRequest = ::exitApplication,
     title = "GearSym2000",
-    enabled = !detectorState.isBusy.value,
+    enabled = !detectorState.isAppBusy.value,
     state = WindowState(
         position = WindowPosition( Alignment.Center ),
         size = DpSize.Unspecified
         )
     )
 {
-    DetectorContent(
-        readFromFile = detectorState.readFromFile,
-        liveGenerate = detectorState.liveGenerate
-    )
+    DetectorContent()
 }
 
 private class GeneratorState(
-    var isVisible: MutableState<Boolean>,
-    val close: () -> Unit,
-    var randomInt : MutableState<Int>
+    var isAppBusy : MutableState<Boolean>,
+    var isOpen : MutableState<Boolean>
 )
-
 @Composable
-private fun GeneratorWindow (
+private fun GeneratorWindow(
     generatorState : GeneratorState
 ) = Window (
-    visible = generatorState.isVisible.value,
-    onCloseRequest = { generatorState.close() },
-    title = "Generator",
+    onCloseRequest = {},
+    title = "The Generator",
+    enabled = !generatorState.isAppBusy.value,
+    visible = generatorState.isOpen.value,
     state = WindowState(
         position = WindowPosition( Alignment.Center ),
-        size = DpSize( 300.dp, 200.dp )
+        size = DpSize.Unspecified
         )
     )
 {
-    GeneratorContent( generatorState.randomInt )
+    GeneratorContent()
 }
