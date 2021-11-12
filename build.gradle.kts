@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0-beta6-dev450"
+    id("org.jetbrains.compose") version "1.0.0-beta6-dev455"
 }
 
 group = "com.s452635"
@@ -26,7 +26,6 @@ tasks.withType<KotlinCompile>() {
 
 compose.desktop {
     application {
-        // TODO : change main class
         mainClass = "MainAppKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

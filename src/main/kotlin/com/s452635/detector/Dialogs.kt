@@ -12,6 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -28,6 +31,7 @@ fun filePickingDialog() : File?
     return chooser.selectedFile
 }
 
+// "Gear System"
 @Composable
 fun formTest()
 {
@@ -49,8 +53,8 @@ fun formTest()
             modifier = Modifier
                 .height( IntrinsicSize.Max )
                 .width( 300.dp )
-                .background( colorPrimary, shapeRounded )
-                .border( 2.dp, colorPrimary, shapeRounded )
+                .background( MyColors.Primary, MyShapes.ShapeRounded )
+                .border( 2.dp, MyColors.Primary, MyShapes.ShapeRounded )
             )
         {
             Text(
@@ -62,7 +66,7 @@ fun formTest()
             )
             Box(
                 Modifier
-                    .background( Color.White, shapeRounded )
+                    .background( Color.White, MyShapes.ShapeRounded )
             )
             {
             BasicTextField (
@@ -91,8 +95,8 @@ fun formTest()
             Button (
                 onClick = {},
                 content = { Text( "load" ) },
-                colors = ButtonDefaults.buttonColors( backgroundColor = colorPrimary ),
-                shape = shapeRounded,
+                colors = ButtonDefaults.buttonColors( backgroundColor = MyColors.Primary ),
+                shape = MyShapes.ShapeRounded,
                 modifier = Modifier
                     .wrapContentWidth()
                     .height( 40.dp )
@@ -103,8 +107,8 @@ fun formTest()
             Button (
                 onClick = {},
                 content = { Text( "save" ) },
-                colors = ButtonDefaults.buttonColors( backgroundColor = colorPrimary ),
-                shape = shapeRounded,
+                colors = ButtonDefaults.buttonColors( backgroundColor = MyColors.Primary ),
+                shape = MyShapes.ShapeRounded,
                 modifier = Modifier
                     .wrapContentWidth()
                     .height( 40.dp )
@@ -115,8 +119,8 @@ fun formTest()
             Button (
                 onClick = {},
                 content = { Text( "accept" ) },
-                colors = ButtonDefaults.buttonColors( backgroundColor = colorPrimary ),
-                shape = shapeRounded,
+                colors = ButtonDefaults.buttonColors( backgroundColor = MyColors.Primary ),
+                shape = MyShapes.ShapeRounded,
                 modifier = Modifier
                     .wrapContentWidth()
                     .height( 40.dp )
@@ -125,6 +129,127 @@ fun formTest()
                 )
         }
     } }
+}
+
+@Composable
+fun main2()
+{
+    MaterialTheme { Column(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding( 15.dp ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+        )
+    {
+
+        listOf( "HL Input", "Gear System" ).forEach {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height( IntrinsicSize.Max )
+        )
+        {
+            Text(
+                text = it,
+                modifier = Modifier
+                    .width( 120.dp )
+                    .padding( 5.dp, 0.dp )
+                )
+            BasicTextField(
+                value ="aaaaaaaaaaa",
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier
+                    .background( Color.White )
+                    .padding( 0.dp, 3.dp )
+                    .width( 200.dp )
+                )
+            Spacer( Modifier.width( 5.dp ) )
+            listOf( "EDIT", "LOOK" ).forEach { innerIt ->
+                Button(
+                    content = { Text(innerIt) },
+                    contentPadding = PaddingValues( 0.dp ),
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors( backgroundColor = MyColors.Primary ),
+                    shape = RectangleShape,
+                    modifier = Modifier
+                        .width( 60.dp )
+                        .height( 30.dp )
+                    )
+            }
+        }
+        Spacer( Modifier.height( 5.dp ) )
+        }
+
+    } }
+}
+
+@Composable
+fun mainScreen()
+{
+    MaterialTheme { Column(
+        modifier = Modifier
+            .wrapContentWidth()
+            .wrapContentHeight()
+            .padding( 15.dp ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+        )
+    {
+        var textInput by remember { mutableStateOf("") }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .background( Color.LightGray )
+                .wrapContentWidth()
+                .height( IntrinsicSize.Max )
+                .padding( 3.dp )
+        )
+        {
+            Text(
+                text = "HL INPUT:",
+                // Modifier.background( Color.Red )
+                )
+            Spacer( Modifier.width( 2.dp ) )
+            BasicTextField (
+                value = "textInput",
+                onValueChange = { textInput = it },
+                textStyle = TextStyle( fontStyle = FontStyle.Italic ),
+                singleLine = true,
+                readOnly = true,
+                modifier = Modifier
+                    .width( 150.dp )
+                    .wrapContentHeight()
+                    .padding( 7.dp )
+                )
+            listOf( "EDIT", "LOOK" ).forEach {
+                Spacer( Modifier.width( 3.dp ) )
+                Button(
+                    onClick = {},
+                    contentPadding = PaddingValues(0.dp),
+                    content = { Text( it ) },
+                    colors = ButtonDefaults.buttonColors( backgroundColor = MyColors.Primary ),
+                    shape = RectangleShape,
+                    modifier = Modifier
+                        .width( 60.dp )
+                        .height( 30.dp )
+                    )
+            }
+        }
+
+    } }
+}
+
+@Composable
+fun mainText2()
+{
+    var textInput by remember { mutableStateOf("") }
+
+    MainColumn {
+        MyText( "hewwo", textInput ) { textInput = it }
+    }
 }
 
 // TODO : testing main
@@ -138,6 +263,6 @@ fun main() = application {
             )
         )
     {
-        formTest()
+        mainText2()
     }
 }
