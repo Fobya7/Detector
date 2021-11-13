@@ -25,6 +25,7 @@ class DetectorState (
     val hlInputButton : () -> Unit,
     val hlInputLabel: MutableState<String>,
     val gsButton: () -> Unit,
+    val gsButtonEnabled: MutableState<Boolean>,
     val gsLabel: MutableState<String>
 )
 
@@ -46,6 +47,7 @@ fun ApplicationScope.DetectorWindow(
         hlInputButton = detectorState.hlInputButton,
         hlInputLabel = detectorState.hlInputLabel,
         gsButton = detectorState.gsButton,
+        gsButtonEnabled = detectorState.gsButtonEnabled,
         gsLabel = detectorState.gsLabel
     )
 }
@@ -56,6 +58,7 @@ fun DetectorContent(
     hlInputButton : () -> Unit,
     hlInputLabel : MutableState<String>,
     gsButton : () -> Unit,
+    gsButtonEnabled: MutableState<Boolean>,
     gsLabel : MutableState<String>
 ) {
     MainColumn {
@@ -92,6 +95,7 @@ fun DetectorContent(
                     buttonText = "Gear System",
                     onClick = gsButton,
                     label = gsLabel,
+                    isEnabled = gsButtonEnabled,
                     buttonFraction = 0.5F
                     )
             }
