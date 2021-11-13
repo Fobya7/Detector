@@ -1,15 +1,24 @@
 package com.s452635.detector
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun MainColumn( content: @Composable() (ColumnScope.() -> Unit) )
@@ -18,7 +27,8 @@ fun MainColumn( content: @Composable() (ColumnScope.() -> Unit) )
         Column(
         modifier = Modifier
             .padding( 20.dp )
-            .wrapContentSize( unbounded = true ),
+            .wrapContentHeight( unbounded = true )
+            .width( IntrinsicSize.Max ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         content = content
@@ -27,38 +37,135 @@ fun MainColumn( content: @Composable() (ColumnScope.() -> Unit) )
 }
 
 @Composable
-fun MyText( label: String, value: String, changeValue: (String) -> Unit )
-{
-    Row (
-    verticalAlignment = Alignment.CenterVertically,
-    modifier = Modifier
-        .height( IntrinsicSize.Max )
-        .width( 300.dp )
-        .background( MyColors.Primary, MyShapes.ShapeRounded )
-        )
+fun LabeledButton(
+    buttonText : String,
+    label : MutableState<String> = mutableStateOf( "" ),
+    onClick : () -> Unit = {},
+    isEnabled : MutableState<Boolean> = mutableStateOf( true ),
+    width: Dp = 270.dp,
+    buttonFraction: Float = 0.42F
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background( MyColors.DisabledBack, MyShapes.UnevenLeft )
+            .height( 30.dp )
+            .width( width )
+    )
     {
-        Text (
-            text = label,
-            color = Color.White,
+        Button(
+            content = { Text( buttonText, color = Color.White ) },
+            onClick = onClick,
+            enabled = isEnabled.value,
+            contentPadding = PaddingValues( 10.dp, 0.dp ),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MyColors.Primary,
+                disabledBackgroundColor = MyColors.DisabledMain
+                ),
+            shape = MyShapes.Uneven,
             modifier = Modifier
-                .padding( 10.dp, 5.dp )
-                .width( 100.dp )
+                .fillMaxHeight()
+                .fillMaxWidth( buttonFraction )
             )
-        Box (
+        BasicTextField(
+            value = label.value,
+            onValueChange = {},
+            readOnly = true,
+            textStyle = TextStyle(
+                color = MyColors.DisabledMain,
+                fontStyle = FontStyle.Italic
+                ),
             modifier = Modifier
-                .background( Color.White, MyShapes.ShapeRounded )
-                .padding( 3.dp )
-                .weight( 1F )
+                .padding( 10.dp, 0.dp )
+            )
+    }
+}
+
+@Composable
+fun LabeledField(
+    label: String,
+    value: MutableState<String>,
+    isEnabled: MutableState<Boolean> = mutableStateOf( true ),
+    width: Dp = 270.dp,
+    labelFraction: Float = 0.42F
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .height( 30.dp )
+            .width( width )
+            .background(
+                color = if( isEnabled.value ) Color.White else MyColors.DisabledBack,
+                shape = MyShapes.Uneven
+                )
+            .border(
+                width =  2.dp,
+                color = if( isEnabled.value ) MyColors.Primary else MyColors.DisabledMain,
+                shape = MyShapes.Uneven
+                )
+    )
+    {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .background(
+                    color = if( isEnabled.value ) MyColors.Primary else MyColors.DisabledMain,
+                    shape = MyShapes.UnevenLeft
+                    )
+                .fillMaxHeight()
+                .fillMaxWidth( labelFraction )
             )
         {
-            BasicTextField (
-                value = value,
-                onValueChange = changeValue,
-                singleLine = true,
+            Text(
+                text = label,
+                color = Color.White,
+                fontSize = 14.sp,
                 modifier = Modifier
-                    .wrapContentHeight()
+                    .padding( 10.dp, 0.dp )
                 )
         }
-        Spacer( Modifier.width( 13.dp ) )
+        BasicTextField(
+            value = value.value,
+            readOnly = !isEnabled.value,
+            onValueChange = { value.value = it },
+            maxLines = 1,
+            textStyle = TextStyle(
+                color = if(isEnabled.value) Color.Black else MyColors.DisabledMain,
+                fontStyle = if(isEnabled.value) FontStyle.Normal else FontStyle.Italic
+                ),
+            modifier = Modifier
+                .padding( 10.dp, 0.dp )
+            )
     }
+}
+
+@Composable
+fun MyButton(
+    buttonText : String = "",
+    onClick : () -> Unit = {},
+    isEnabled : MutableState<Boolean> = mutableStateOf(true),
+    buttonPos : ButtonPosition = ButtonPosition.Lonely,
+    buttonSize : ButtonSize = ButtonSize.Tiny
+) {
+    Button(
+        content = { Text( buttonText, color = Color.White ) },
+        contentPadding = PaddingValues( 0.dp ),
+        onClick = onClick,
+        enabled = isEnabled.value,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MyColors.Primary,
+            disabledBackgroundColor = MyColors.DisabledMain
+            ),
+        shape = when( buttonPos ) {
+            ButtonPosition.Lonely -> MyShapes.Uneven
+            ButtonPosition.Left -> MyShapes.UnevenLeft
+            ButtonPosition.Center -> MyShapes.Even
+            ButtonPosition.Right -> MyShapes.UnevenRight
+            },
+        modifier = Modifier
+            .height( when( buttonSize ) {
+                ButtonSize.Tiny -> 30.dp
+                ButtonSize.Biggie -> 50.dp
+                })
+        )
 }

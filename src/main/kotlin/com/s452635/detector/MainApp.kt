@@ -25,7 +25,13 @@ private class ApplicationState
 
     var detectorSt = mutableStateOf( detectorState() )
     private fun detectorState() = DetectorState(
-        isAppBusy = isBusy
+        isAppBusy = isBusy,
+
+        startButton = ::closeGenerator,
+        hlInputButton = ::openGenerator,
+        hlInputLabel = mutableStateOf("none"),
+        gsButton = {},
+        gsLabel = mutableStateOf("none")
     )
 
     var generatorSt = mutableStateOf( generatorState() )
