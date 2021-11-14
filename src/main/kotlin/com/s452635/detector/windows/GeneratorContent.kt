@@ -1,4 +1,4 @@
-package com.s452635.detector
+package com.s452635.detector.windows
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
+import com.s452635.detector.MainColumn
 
 class GeneratorState(
     var isAppBusy : MutableState<Boolean>,

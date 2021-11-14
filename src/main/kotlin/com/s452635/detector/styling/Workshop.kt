@@ -1,19 +1,16 @@
 package com.s452635.detector
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
@@ -76,53 +73,10 @@ fun componentTest()
 }
 
 @Composable
-fun detectorStyle(
-    startButton : () -> Unit = {},
-    hlInputButton : () -> Unit = {},
-    hlInputLabel : MutableState<String> = mutableStateOf("none"),
-    gsButton : () -> Unit = {},
-    gsLabel : MutableState<String> = mutableStateOf("none")
+fun formStyle(
+    isEnabled : MutableState<Boolean> = mutableStateOf( true )
 ) {
-    MainColumn {
-        Row(
-            Modifier
-                .height( IntrinsicSize.Max )
-                .border( 1.dp, MyColors.DisabledBack )
-                .padding( 10.dp )
-        )
-        {
-            Button(
-                content = { Text( "START", fontSize = 18.sp ) },
-                onClick = startButton,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MyColors.Primary,
-                    contentColor = Color.White
-                    ),
-                shape = MyShapes.Uneven,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width( 100.dp )
-            )
-            Spacer( Modifier.width( 5.dp ) )
-            Column()
-            {
-                LabeledButton(
-                    buttonText = "HL Input",
-                    onClick = hlInputButton,
-                    label = hlInputLabel,
-                    buttonFraction = 0.5F
-                    )
-                Spacer( Modifier.height( 5.dp ) )
-                LabeledButton(
-                    buttonText = "Gear System",
-                    onClick = gsButton,
-                    label = gsLabel,
-                    buttonFraction = 0.5F
-                    )
-            }
-        }
 
-    }
 }
 
 fun main() = application {
@@ -135,6 +89,6 @@ fun main() = application {
             )
         )
     {
-        detectorStyle()
+        formStyle()
     }
 }

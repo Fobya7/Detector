@@ -3,6 +3,8 @@ package com.s452635.detector
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
+import com.s452635.detector.windows.chooseHlInput
+import com.s452635.detector.windows.initFileChoosers
 import java.io.File
 
 fun main() = application {

@@ -1,5 +1,6 @@
-package com.s452635.detector
+package com.s452635.detector.windows
 
+import com.s452635.detector.HlOption
 import java.io.File
 import java.nio.file.Paths
 import javax.swing.JFileChooser
@@ -49,7 +50,7 @@ fun chooseHlInput() : Pair<HlOption, File?>?
 
     if( n == 1 )
     {
-        return Pair( HlOption.LiveGeneration, null )
+        return Pair(HlOption.LiveGeneration, null )
     }
 
     if( n == 0 )
@@ -61,12 +62,12 @@ fun chooseHlInput() : Pair<HlOption, File?>?
 
             if( it.name.endsWith( ".txt" ) )
             {
-                return Pair( HlOption.FromTxtFile, returnFile )
+                return Pair(HlOption.FromTxtFile, returnFile )
             }
 
             if( it.name.endsWith( ".hl" ) )
             {
-                return Pair( HlOption.FromHlFile, returnFile )
+                return Pair(HlOption.FromHlFile, returnFile )
             }
 
             JOptionPane.showMessageDialog(
