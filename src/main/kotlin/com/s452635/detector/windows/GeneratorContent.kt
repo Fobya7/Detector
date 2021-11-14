@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import com.s452635.detector.MainColumn
+import com.s452635.detector.styling.MainColumn
 
 class GeneratorState(
     var isAppBusy : MutableState<Boolean>,

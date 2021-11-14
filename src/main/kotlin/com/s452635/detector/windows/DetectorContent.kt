@@ -17,10 +17,10 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import com.s452635.detector.LabeledButton
-import com.s452635.detector.MainColumn
-import com.s452635.detector.MyColors
-import com.s452635.detector.MyShapes
+import com.s452635.detector.styling.MyColors
+import com.s452635.detector.styling.MyShapes
+import com.s452635.detector.styling.LabeledButton
+import com.s452635.detector.styling.MainColumn
 
 class DetectorState(
     val isAppBusy : MutableState<Boolean>,

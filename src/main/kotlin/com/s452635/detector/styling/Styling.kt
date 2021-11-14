@@ -1,25 +1,19 @@
-package com.s452635.detector
+package com.s452635.detector.styling
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 
-enum class ButtonPosition
-{
-    Lonely, Center, Right, Left
-}
-
-enum class ButtonSize
-{
-    Biggie, Tiny
-}
-
 object MyColors
 {
     val Primary = Color( 252, 152, 3 )
+    val IncorrectRed = Color( 217, 120, 91 )
     val DisabledMain = Color( 143, 143, 143 )
     val DisabledBack = Color( 207, 207, 207 )
+
+    val GhostlyBackground = Color( 207, 207, 207, 220 )
+    val GhostlyGray = Color( 143, 143, 143, 220 )
 }
 
 object MyShapes
