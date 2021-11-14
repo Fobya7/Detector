@@ -15,72 +15,168 @@ private class ApplicationState
 {
     init
     {
-        initChoosers()
+        initFileChoosers()
     }
 
-    var isBusy = mutableStateOf( false )
-    var hlOption = mutableStateOf( HlOption.None )
+    // region valuable variables
+
     var hlFile = mutableStateOf<File?>( null )
+    var gsFile = mutableStateOf<File?>( null )
+
+    // endregion
+
+    // region program management
+
+    var isBusy = mutableStateOf( false )
+    fun makeBusy() { isBusy.value = true }
+    fun makeNotBusy() { isBusy.value = false }
+
+    var programOption = mutableStateOf( ProgramOption.Init )
+    var hlOption = mutableStateOf( HlOption.None )
     var gsOption = mutableStateOf( GsOption.None )
 
-    var isGeneratorOpen = mutableStateOf( false )
-    fun openGenerator() { isGeneratorOpen.value = true }
-    fun closeGenerator() { isGeneratorOpen.value = false }
+    var isGearFormEditable = mutableStateOf( true )
+    var isGearFormVisible = mutableStateOf( false )
+    fun hideGearForm() { isGearFormVisible.value = false }
+    fun showGearForm()
+    {
+        isGearFormEditable.value = when( programOption.value )
+        {
+            ProgramOption.Init -> true
+            else -> false
+        }
+
+        isGearFormVisible.value = true
+    }
+
+    var isGeneratorVisible = mutableStateOf( false )
+    fun showGenerator() { isGeneratorVisible.value = true }
+    fun hideGenerator() { isGeneratorVisible.value = false }
     fun initGenerator()
     {
-        openGenerator()
+        showGenerator()
         // TODO initiating generator stuff
     }
 
-    fun hlInputChoice()
-    { isBusy.value = true
+    // endregion
 
-        val hlInput = chooseHlInput()
-        if( hlInput == null ) { isBusy.value = false; return }
+    // region window functions
 
-        hlOption.value = hlInput.first
-        hlFile.value = hlInput.second
-
-        detectorSt.value.hlInputLabel.value = when( hlOption.value )
-        {
-            HlOption.LiveGeneration -> "live generator"
-            HlOption.FromTxtFile, HlOption.FromHlFile -> "${hlFile.value?.name}"
-            HlOption.None -> "none"
-        }
-
-        detectorSt.value.gsButtonEnabled.value = hlOption.value != HlOption.FromHlFile
-        if( hlOption.value == HlOption.FromHlFile )
-        {
-            gsOption.value = GsOption.FromHlFile
-            detectorSt.value.gsLabel.value = "${ hlFile.value?.name}"
-        }
-        if( gsOption.value == GsOption.FromHlFile && hlOption.value != HlOption.FromHlFile )
-        {
-            gsOption.value = GsOption.None
-            detectorSt.value.gsLabel.value = "none"
-        }
-
-    isBusy.value = false }
-
-    fun start()
+    var canStart = mutableStateOf( false )
+    fun checkIfCanStart()
+    {
+        canStart.value = hlOption.value != HlOption.None && gsOption.value != GsOption.None
+    }
+    fun startButton()
     {
         // TODO : check if selected file is correct
+    }
+
+    fun hlButton()
+    {
+        fun hlInputChoice()
+        {
+            val hlInput = chooseHlInput() ?: return
+            hlOption.value = hlInput.first
+            hlFile.value = hlInput.second
+
+            updateGsButton()
+            updateButtonLabels()
+            checkIfCanStart()
+        }
+
+        when( programOption.value )
+        {
+            ProgramOption.Init ->
+            {
+                makeBusy()
+                hlInputChoice()
+                makeNotBusy()
+            }
+            else -> {}
+        }
+    }
+
+    var isGsButtonEnabled = mutableStateOf( true )
+    fun updateGsButton()
+    {
+        isGsButtonEnabled.value = hlOption.value != HlOption.FromHlFile
+    }
+    fun gsButton()
+    {
+        when( programOption.value )
+        {
+            ProgramOption.Init ->
+            {
+                makeBusy()
+                showGearForm()
+                makeNotBusy()
+                // TODO : it's not a dialog, make not busy by click
+            }
+            else -> {}
+        }
+    }
+
+    var gsLabel = mutableStateOf( "none" )
+    var hlLabel = mutableStateOf( "none" )
+    fun updateButtonLabels()
+    {
+        fun updateHlLabel()
+        {
+            hlLabel.value = when( hlOption.value )
+            {
+                HlOption.None -> "none"
+                HlOption.FromTxtFile, HlOption.FromHlFile -> hlFile.value!!.name
+                HlOption.LiveGeneration -> "live generation"
+            }
+        }
+
+        fun updateGsLabel()
+        {
+            if( gsOption.value == GsOption.FromHlFile && hlOption.value != HlOption.FromHlFile )
+            {
+                gsOption.value = GsOption.None
+            }
+            if( hlOption.value == HlOption.FromHlFile )
+            {
+                gsOption.value = GsOption.FromHlFile
+            }
+
+            gsLabel.value = when( gsOption.value )
+            {
+                GsOption.None -> "none"
+                GsOption.FromHlFile -> hlFile.value!!.name
+                GsOption.Custom -> "custom system"
+                GsOption.FromGearFile -> gsFile.value!!.name
+            }
+        }
+
+        updateHlLabel()
+        updateGsLabel()
     }
 
     var detectorSt = mutableStateOf( detectorState() )
     private fun detectorState() = DetectorState (
         isAppBusy = isBusy,
-        startButton = ::closeGenerator,
-        hlInputButton = ::hlInputChoice,
-        hlInputLabel = mutableStateOf("none"),
-        gsButton = {},
-        gsButtonEnabled = mutableStateOf(true),
-        gsLabel = mutableStateOf("none")
+        startButton = ::hideGenerator,
+        hlButton = ::hlButton,
+        gsButton = ::gsButton,
+        gsButtonEnabled = isGsButtonEnabled,
+        startButtonEnabled = canStart,
+        hlLabel = hlLabel,
+        gsLabel = gsLabel,
     )
 
     var generatorSt = mutableStateOf( generatorState() )
     private fun generatorState() = GeneratorState (
         isAppBusy = isBusy,
-        isOpen = isGeneratorOpen
+        isOpen = isGeneratorVisible
     )
+
+    // endregion
+
 }
+
+enum class HlOption { None, LiveGeneration, FromTxtFile, FromHlFile }
+enum class GsOption { None, FromHlFile, FromGearFile, Custom }
+enum class ProgramOption { Init, Working }

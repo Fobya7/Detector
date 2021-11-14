@@ -7,14 +7,12 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 val chooserHL = JFileChooser()
 val chooserGear = JFileChooser()
-fun initChoosers()
+fun initFileChoosers()
 {
     chooserHL.fileFilter = FileNameExtensionFilter("Acceptable", "txt", "hl")
     chooserGear.fileFilter = FileNameExtensionFilter("Acceptable", "gear" )
 }
 
-enum class HlOption { None, LiveGeneration, FromTxtFile, FromHlFile }
-enum class GsOption { None, FromHlFile, FromGearFile, Custom }
 fun chooseHlInput() : Pair<HlOption, File?>?
 {
     val n = JOptionPane.showOptionDialog (

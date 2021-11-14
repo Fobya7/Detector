@@ -18,15 +18,15 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 
-class DetectorState (
-    val isAppBusy: MutableState<Boolean>,
-
+class DetectorState(
+    val isAppBusy : MutableState<Boolean>,
     val startButton : () -> Unit,
-    val hlInputButton : () -> Unit,
-    val hlInputLabel: MutableState<String>,
-    val gsButton: () -> Unit,
-    val gsButtonEnabled: MutableState<Boolean>,
-    val gsLabel: MutableState<String>
+    val hlButton : () -> Unit,
+    val hlLabel : MutableState<String>,
+    val gsButton : () -> Unit,
+    val gsButtonEnabled : MutableState<Boolean>,
+    val startButtonEnabled : MutableState<Boolean>,
+    val gsLabel : MutableState<String>
 )
 
 @Composable
@@ -44,10 +44,11 @@ fun ApplicationScope.DetectorWindow(
 {
     DetectorContent(
         startButton = detectorState.startButton,
-        hlInputButton = detectorState.hlInputButton,
-        hlInputLabel = detectorState.hlInputLabel,
+        hlInputButton = detectorState.hlButton,
+        hlInputLabel = detectorState.hlLabel,
         gsButton = detectorState.gsButton,
         gsButtonEnabled = detectorState.gsButtonEnabled,
+        startButtonEnabled = detectorState.startButtonEnabled,
         gsLabel = detectorState.gsLabel
     )
 }
@@ -58,7 +59,8 @@ fun DetectorContent(
     hlInputButton : () -> Unit,
     hlInputLabel : MutableState<String>,
     gsButton : () -> Unit,
-    gsButtonEnabled: MutableState<Boolean>,
+    gsButtonEnabled : MutableState<Boolean>,
+    startButtonEnabled : MutableState<Boolean>,
     gsLabel : MutableState<String>
 ) {
     MainColumn {
@@ -70,11 +72,12 @@ fun DetectorContent(
         )
         {
             Button(
-                content = { Text( "START", fontSize = 18.sp ) },
+                content = { Text( "START", fontSize = 18.sp, color = Color.White ) },
                 onClick = startButton,
+                enabled = startButtonEnabled.value,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MyColors.Primary,
-                    contentColor = Color.White
+                    disabledBackgroundColor = MyColors.DisabledMain
                     ),
                 shape = MyShapes.Uneven,
                 modifier = Modifier
