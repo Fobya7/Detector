@@ -1,18 +1,38 @@
 package com.s452635.detector
 
 import java.io.File
+import java.nio.file.Paths
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 import javax.swing.filechooser.FileNameExtensionFilter
+
+val dataFile = File( File("src/main/resources/Data.txt").absolutePath )
+var currentWorkingDirectory: File = pathInitCWD()
+fun pathInitCWD() : File
+{
+    val savedWorkingDirectory = Paths.get((dataFile.readText())).toFile()
+
+    if( !savedWorkingDirectory.isDirectory )
+    {
+        return File( System.getProperty("user.home") )
+    }
+
+    return savedWorkingDirectory
+}
+fun pathSaveCWD( file: File )
+{
+    dataFile.writeText( file.path.toString() )
+}
 
 val chooserHL = JFileChooser()
 val chooserGear = JFileChooser()
 fun initFileChoosers()
 {
+    chooserHL.currentDirectory = currentWorkingDirectory
+    chooserGear.currentDirectory = currentWorkingDirectory
     chooserHL.fileFilter = FileNameExtensionFilter("Acceptable", "txt", "hl")
     chooserGear.fileFilter = FileNameExtensionFilter("Acceptable", "gear" )
 }
-
 fun chooseHlInput() : Pair<HlOption, File?>?
 {
     val n = JOptionPane.showOptionDialog (
@@ -35,6 +55,7 @@ fun chooseHlInput() : Pair<HlOption, File?>?
     if( n == 0 )
     {
         chooserHL.showOpenDialog( null )
+        pathSaveCWD( chooserHL.currentDirectory )
         val returnFile = chooserHL.selectedFile
         returnFile?.let {
 
