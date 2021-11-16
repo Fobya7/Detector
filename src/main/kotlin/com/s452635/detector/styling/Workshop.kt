@@ -13,7 +13,10 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import com.s452635.detector.detecting.MutableGearSystem
+import com.s452635.detector.detecting.GearSystemBuilder
+import com.s452635.detector.detecting.ScanQueue
+import java.lang.Thread.sleep
+import kotlin.concurrent.thread
 
 // components
 
@@ -87,24 +90,49 @@ fun componentTest()
 @Composable
 fun formStyle(
     isEnabled : MutableState<Boolean> = mutableStateOf( true ),
-    gearSystem : MutableGearSystem = MutableGearSystem()
+    gearSystemBuilder : GearSystemBuilder = GearSystemBuilder()
 ) {
 
     MainColumn {
-
-        LabeledField(
-            label = "tooth no.",
-            isEnabled = isEnabled,
-            value = gearSystem.toothNo
-            )
-        Spacer( Modifier.height( 5.dp ) )
-        LabeledField(
-            label = "tooth length",
-            isEnabled = isEnabled,
-            value = gearSystem.toothLength
-            )
+        PatheticBorder( "inputables" ) { Column {
+            LabeledField(
+                label = "tooth amount",
+                isEnabled = isEnabled,
+                value = gearSystemBuilder.toothAmountField,
+                tooltipText = GearSystemBuilder.toothAmountTooltip,
+                correctionChecking = { gearSystemBuilder.isToothAmountFieldCorrect() }
+                )
+            Spacer( Modifier.height( 5.dp ) )
+            LabeledField(
+                label = "diameter",
+                isEnabled = isEnabled,
+                value = gearSystemBuilder.diameterField,
+                tooltipText = GearSystemBuilder.diameterTooltip,
+                correctionChecking = { gearSystemBuilder.isDiameterFieldCorrect() }
+                )
+            Spacer( Modifier.height( 5.dp ) )
+            LabeledField(
+                label = "detector tick",
+                value = mutableStateOf("")
+                )
+        } }
 
         Spacer( Modifier.height( 15.dp ) )
+        PatheticBorder( "calculables" ) { Column {
+            LabeledField(
+                label = "max AGS",
+                value = gearSystemBuilder.getMaxAGS(),
+                isEnabled = mutableStateOf( false )
+                )
+            Spacer( Modifier.height( 5.dp ) )
+            LabeledField(
+                label = "area angle",
+                value = mutableStateOf("0"),
+                isEnabled = mutableStateOf( false )
+                )
+        } }
+
+        Spacer( Modifier.height( 30.dp ) )
         Row()
         {
             if( isEnabled.value )
@@ -130,6 +158,23 @@ fun formStyle(
 
 }
 
+@Composable
+fun scanBoxTest()
+{
+    val one = ScanQueue( startingList = listOf( "H", "L", "H", "L", "H", "L", "H", "L", "H", "L", "H", "L", "H", "L" ) )
+    thread {
+        while( !one.isBlocked() )
+        {
+            one.nextItem()
+            sleep( 500 )
+        }
+    }
+
+    MainColumn {
+        ScanRow( mutableStateOf(one) )
+    }
+}
+
 fun main() = application {
     Window (
         onCloseRequest = ::exitApplication,
@@ -140,6 +185,6 @@ fun main() = application {
             )
         )
     {
-        formStyle( mutableStateOf( false ) )
+        formStyle()
     }
 }

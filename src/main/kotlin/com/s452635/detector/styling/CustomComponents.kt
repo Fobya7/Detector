@@ -15,10 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.s452635.detector.detecting.ScanQueue
 
 @Composable
 fun MainColumn( content: @Composable() (ColumnScope.() -> Unit) )
@@ -218,4 +221,95 @@ enum class ButtonPosition
 enum class ButtonSize
 {
     Biggie, Tiny
+}
+
+@Composable
+fun PatheticBorder(
+    labelText: String = "",
+    content : @Composable() (() -> Unit)
+) {
+    Column {
+        if( labelText != "" )
+        {
+            Text(
+                text = labelText,
+                color = MyColors.DisabledBack,
+                fontSize = 13.sp,
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier.padding( 10.dp, 0.dp )
+                )
+        }
+        Column(
+            modifier = Modifier
+                .height( IntrinsicSize.Max )
+                .border( 1.dp, MyColors.DisabledBack )
+                .padding( 10.dp ),
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun ScanRow(
+    scanQueue : MutableState<ScanQueue>
+) {
+    val size : Dp = 24.dp
+    @Composable
+    fun TheList( list : List<String> )
+    {
+        Row( modifier = Modifier.border( 2.dp, Color.Black, MyShapes.Even ) )
+        {
+            list.forEach {
+            Text(
+                text = it,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .width( size )
+                    .border( 1.dp, Color.Black, MyShapes.Even )
+                    .background( Color.White )
+                    .padding( 5.dp )
+                )
+            }
+        }
+    }
+    @Composable
+    fun TheMainItem( text : String )
+    {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .padding( 2.dp )
+                    .height( 48.dp )
+                    .border( 3.dp, MyColors.Primary, MyShapes.Uneven )
+                    .padding( 5.dp )
+        )
+        {
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .width( size )
+                    .border( 2.dp, Color.Black, MyShapes.Even )
+                    .background( Color.White )
+                    .padding( 5.dp )
+                )
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "ScA",
+            color = MyColors.Primary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp ,
+            modifier = Modifier.padding( 0.dp, 0.dp, 10.dp, 0.dp )
+            )
+        TheList( scanQueue.value.preQueue.value )
+        TheMainItem( scanQueue.value.currentItem.value!! )
+        TheList( scanQueue.value.postQueue.value.take( scanQueue.value.postQueueSize ) )
+    }
 }

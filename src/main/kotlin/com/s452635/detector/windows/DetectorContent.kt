@@ -1,6 +1,5 @@
 package com.s452635.detector.windows
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -17,10 +16,7 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import com.s452635.detector.styling.MyColors
-import com.s452635.detector.styling.MyShapes
-import com.s452635.detector.styling.LabeledButton
-import com.s452635.detector.styling.MainColumn
+import com.s452635.detector.styling.*
 
 class DetectorState(
     val isAppBusy : MutableState<Boolean>,
@@ -68,13 +64,8 @@ fun DetectorContent(
     gsLabel : MutableState<String>
 ) {
     MainColumn {
-        Row(
-            Modifier
-                .height( IntrinsicSize.Max )
-                .border( 1.dp, MyColors.DisabledBack )
-                .padding( 10.dp )
-        )
-        {
+
+        PatheticBorder { Row {
             Button(
                 content = { Text( "START", fontSize = 18.sp, color = Color.White ) },
                 onClick = startButton,
@@ -106,7 +97,7 @@ fun DetectorContent(
                     buttonFraction = 0.5F
                     )
             }
-        }
+        } }
 
     }
 }
