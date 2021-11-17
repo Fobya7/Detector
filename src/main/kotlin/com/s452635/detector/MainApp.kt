@@ -1,15 +1,19 @@
 package com.s452635.detector
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
+import com.s452635.detector.detecting.GearSystem
 import com.s452635.detector.windows.*
 import java.io.File
 
+@ExperimentalFoundationApi
 fun main() = application {
     val applicationState = remember { ApplicationState() }
     DetectorWindow( applicationState.detectorSt.value )
     GeneratorWindow( applicationState.generatorSt.value )
+    GearFormWindow( applicationState.gearFormState.value )
 }
 
 private class ApplicationState
@@ -23,6 +27,7 @@ private class ApplicationState
 
     var hlFile = mutableStateOf<File?>( null )
     var gsFile = mutableStateOf<File?>( null )
+    val gs = mutableStateOf( GearSystem() )
 
     // endregion
 
@@ -32,25 +37,15 @@ private class ApplicationState
     fun makeBusy() { isBusy.value = true }
     fun makeNotBusy() { isBusy.value = false }
 
-    var programOption = mutableStateOf( ProgramOption.Init )
-    var hlOption = mutableStateOf( HlOption.None )
-    var gsOption = mutableStateOf( GsOption.None )
+    val programOption = mutableStateOf( ProgramOption.Init )
+    val hlOption = mutableStateOf( HlOption.None )
+    val gsOption = mutableStateOf( GsOption.None )
 
-    var isGearFormEditable = mutableStateOf( true )
-    var isGearFormVisible = mutableStateOf( false )
+    val isGearFormVisible = mutableStateOf( false )
+    fun showGearForm() { isGearFormVisible.value = true }
     fun hideGearForm() { isGearFormVisible.value = false }
-    fun showGearForm()
-    {
-        isGearFormEditable.value = when( programOption.value )
-        {
-            ProgramOption.Init -> true
-            else -> false
-        }
 
-        isGearFormVisible.value = true
-    }
-
-    var isGeneratorVisible = mutableStateOf( false )
+    val isGeneratorVisible = mutableStateOf( false )
     fun showGenerator() { isGeneratorVisible.value = true }
     fun hideGenerator() { isGeneratorVisible.value = false }
     fun initGenerator()
@@ -98,7 +93,7 @@ private class ApplicationState
         }
     }
 
-    var isGsButtonEnabled = mutableStateOf( true )
+    val isGsButtonEnabled = mutableStateOf( true )
     fun updateGsButton()
     {
         isGsButtonEnabled.value = hlOption.value != HlOption.FromHlFile
@@ -109,17 +104,17 @@ private class ApplicationState
         {
             ProgramOption.Init ->
             {
-                makeBusy()
+                // makeBusy()
                 showGearForm()
-                makeNotBusy()
+                // makeNotBusy()
                 // TODO : it's not a dialog, make not busy by click
             }
             else -> {}
         }
     }
 
-    var gsLabel = mutableStateOf( "none" )
-    var hlLabel = mutableStateOf( "none" )
+    val gsLabel = mutableStateOf( "none" )
+    val hlLabel = mutableStateOf( "none" )
     fun updateButtonLabels()
     {
         fun updateHlLabel()
@@ -156,7 +151,7 @@ private class ApplicationState
         updateGsLabel()
     }
 
-    var detectorSt = mutableStateOf( detectorState() )
+    val detectorSt = mutableStateOf( detectorState() )
     private fun detectorState() = DetectorState (
         isAppBusy = isBusy,
         startButton = ::hideGenerator,
@@ -168,10 +163,17 @@ private class ApplicationState
         gsLabel = gsLabel,
     )
 
-    var generatorSt = mutableStateOf( generatorState() )
+    val generatorSt = mutableStateOf( generatorState() )
     private fun generatorState() = GeneratorState (
         isAppBusy = isBusy,
         isOpen = isGeneratorVisible
+    )
+
+    val gearFormState = mutableStateOf( gearFormState() )
+    private fun gearFormState() = GearFormState (
+        isOpen = isGearFormVisible,
+        gearSystem = gs,
+        gsAccepted = { hideGearForm() }
     )
 
     // endregion
