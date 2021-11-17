@@ -84,11 +84,13 @@ fun LabeledButton(
     }
 }
 
+// TODO : switch to LabelField2
 @ExperimentalFoundationApi
 @Composable
 fun LabeledField(
     label: String,
     value: MutableState<String>,
+    onValueChange: () -> Unit = {},
     isEnabled: MutableState<Boolean> = mutableStateOf( true ),
     correctionChecking: () -> Boolean = { true },
     width: Dp = 270.dp,
@@ -171,11 +173,111 @@ fun LabeledField(
         BasicTextField(
             value = value.value,
             readOnly = !isEnabled.value,
-            onValueChange = { value.value = it },
+            onValueChange = { value.value = it; onValueChange() },
             maxLines = 1,
             textStyle = TextStyle(
                 color = if(isEnabled.value) Color.Black else MyColors.DisabledMain,
                 fontStyle = if(isEnabled.value) FontStyle.Normal else FontStyle.Italic
+            ),
+            modifier = Modifier
+                .padding(10.dp, 0.dp)
+        )
+
+    }
+}
+@ExperimentalFoundationApi
+@Composable
+fun LabeledField2(
+    label: String,
+    value: MutableState<String>,
+    onValueChange: () -> Unit = {},
+    isEnabled: Boolean = true,
+    isCorrect: Boolean = true,
+    width: Dp = 270.dp,
+    labelFraction: Float = 0.42F,
+    tooltipText : String? = null
+) {
+
+    @Composable
+    fun tooltipInsides()
+    {
+        if( tooltipText == null ) { return }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .background( MyColors.GhostlyBackground )
+                .padding( 10.dp, 5.dp )
+            )
+        {
+            Text(
+                text = tooltipText,
+                fontSize = 12.sp,
+                color = MyColors.GhostlyGray,
+                fontStyle = FontStyle.Italic
+                )
+        }
+
+    }
+
+    fun mostColor() : Color
+    {
+        if( !isEnabled ) return MyColors.DisabledMain
+        if( !isCorrect ) return MyColors.IncorrectRed
+        return MyColors.Primary
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .height( 30.dp )
+            .width( width )
+            .background(
+                color = if( isEnabled ) Color.White else MyColors.DisabledBack,
+                shape = MyShapes.Uneven
+                )
+            .border(
+                width =  2.dp,
+                color = mostColor(),
+                shape = MyShapes.Uneven
+                )
+    )
+    {
+        TooltipArea(
+            tooltip = { tooltipInsides() },
+            tooltipPlacement = TooltipPlacement.CursorPoint(
+                offset = DpOffset(10.dp, 0.dp)
+                )
+            )
+        {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(
+                        color = mostColor(),
+                        shape = MyShapes.UnevenLeft
+                        )
+                    .fillMaxHeight()
+                    .fillMaxWidth( labelFraction )
+                )
+            {
+                Text(
+                    text = label,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding( 10.dp, 0.dp )
+                    )
+            }
+        }
+        BasicTextField(
+            value = value.value,
+            onValueChange = { value.value = it; onValueChange() },
+            readOnly = !isEnabled,
+            maxLines = 1,
+            textStyle = TextStyle(
+                color = if(isEnabled) Color.Black else MyColors.DisabledMain,
+                fontStyle = if(isEnabled) FontStyle.Normal else FontStyle.Italic
             ),
             modifier = Modifier
                 .padding(10.dp, 0.dp)
@@ -311,5 +413,34 @@ fun ScanRow(
         TheList( scanQueue.value.preQueue.value )
         TheMainItem( scanQueue.value.currentItem.value!! )
         TheList( scanQueue.value.postQueue.value.take( scanQueue.value.postQueueSize ) )
+    }
+}
+
+class NumberFieldManager (
+    val label : String = "no name",
+    val tooltip : String = "no tooltip",
+    val correctionChecking : ( NumberFieldManager ) -> Boolean
+) {
+    val field : MutableState<String> = mutableStateOf("")
+    var number : Int? = null
+    var isCorrect : Boolean = false
+
+    fun onValueChange()
+    {
+        fun isFieldADigit() : Boolean
+        {
+            field ?: return false
+            if( !field.value.matches( Regex("\\d++") ) ) { return false }
+
+            return true
+        }
+
+        number =
+            if( isFieldADigit() ) field.value.toInt()
+            else null
+
+        isCorrect =
+            if( number == null ) false
+            else correctionChecking( this )
     }
 }

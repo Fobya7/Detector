@@ -2,92 +2,85 @@ package com.s452635.detector.detecting
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-
-// TODO : mutating?
-class GearSystemBuilder
-{
-    companion object
-    {
-        const val toothAmountTooltip : String = "tooth amount"
-        const val diameterTooltip : String = "diameter"
-    }
-
-    private var toothAmount : Int? = 0
-    private var diameter : Int? = null
-
-    // inputables
-    val toothAmountField : MutableState<String> = mutableStateOf( "" )
-    val diameterField : MutableState<String> = mutableStateOf( "" )
-    val detectorTickField: MutableState<String> = mutableStateOf( "" )
-
-    // calculables
-    private val undefinedConst = "N/A"
-    // val maxAGSField = MutableState<String> = getMaxAGS().
-    fun getMaxAGS() : MutableState<String>
-    {
-        if( !isGearSystemCorrect() )
-        {
-            return mutableStateOf(undefinedConst)
-        }
-
-        return mutableStateOf(GearSystem.calcMaxAGS( toothAmount!!, diameter!! ).toString())
-    }
-    fun getAreaAngle() : MutableState<String>
-    {
-        if( !isGearSystemCorrect() )
-        {
-            return mutableStateOf( undefinedConst )
-        }
-
-        return mutableStateOf("")
-    }
-
-    fun isToothAmountFieldCorrect() : Boolean
-    {
-        return true
-    }
-    fun isDiameterFieldCorrect() : Boolean
-    {
-        // TODO : actual checking
-
-        if( !diameterField.value.matches( Regex("\\d++") ) )
-        {
-            diameter = null
-            return false
-        }
-
-        diameter = diameterField.value.toInt()
-        return diameter == 2
-    }
-    fun isGearSystemCorrect() : Boolean
-    {
-        if( diameter == null ) { return false }
-        if( toothAmount == null ) { return false }
-
-        return true
-    }
-
-    fun getGearSystem() : GearSystem?
-    {
-        if( !isGearSystemCorrect() ) { return null }
-
-        return GearSystem( toothAmount!!, diameter!! )
-    }
-}
+import com.s452635.detector.styling.NumberFieldManager
 
 data class GearSystem(
     val toothAmount : Int = 0,
     val diameter : Int = 0,
     val detectorTick : Int = 0,
+    val AreaAngle : Double = 0.0,
+    val maxAGS : Double = 0.0
 )
-{
-    val maxAGS : Int = calcMaxAGS( toothAmount, diameter )
 
-    companion object
+class GearSystemBuilder
+{
+    // region inputables
+
+    val toothAmount = NumberFieldManager(
+        label = "tooth amount",
+        tooltip = "Between 10 and 50."
+    ) {
+        it.number in 10..50
+    }
+
+    val diameter = NumberFieldManager(
+        label = "diameter",
+        tooltip = "Between 5 and 500 cm."
+    ) {
+        it.number in 5..500
+    }
+
+    val detectorTick = NumberFieldManager (
+        label = "detector tick",
+        tooltip = "Between 500 and 2000 ms."
+    ) {
+        it.number!! in 500..2000
+    }
+
+    // endregion
+
+    // region calculables
+
+    private val undefinedConst = "N/A"
+    val areaAngle : MutableState<String> = mutableStateOf(undefinedConst)
+    val maxAGS : MutableState<String> = mutableStateOf(undefinedConst)
+
+    fun updateCalculables()
     {
-        fun calcMaxAGS( toothAmount : Int, diameter : Int ) : Int
+        if( !isGearSystemCorrect() )
         {
-            return 3
+            areaAngle.value = undefinedConst
+            maxAGS.value = undefinedConst
+            return
         }
+        areaAngle.value = calcAreaAngle().toString()
+        maxAGS.value = calcMaxAGS().toString()
+    }
+
+    private fun calcAreaAngle() : Double
+    {
+        return Math.toRadians( 360 /( 2 * toothAmount.number!!.toDouble() ) )
+    }
+    private fun calcMaxAGS() : Double
+    {
+        return areaAngle.value.toDouble() / detectorTick.number!!
+    }
+
+    // endregion
+
+    var isCorrect = mutableStateOf( false )
+    private fun isGearSystemCorrect() : Boolean
+    {
+        isCorrect.value = toothAmount.isCorrect && diameter.isCorrect && detectorTick.isCorrect
+        println( "in use $isCorrect" )
+        return isCorrect.value
+    }
+
+    fun build() : GearSystem
+    {
+        return GearSystem (
+            toothAmount.number!!, diameter.number!!, detectorTick.number!!,
+            calcAreaAngle(), calcMaxAGS()
+            )
     }
 }

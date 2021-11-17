@@ -2,9 +2,7 @@ package com.s452635.detector.styling
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
@@ -13,9 +11,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import com.s452635.detector.detecting.GearSystem
 import com.s452635.detector.detecting.GearSystemBuilder
 import com.s452635.detector.detecting.ScanQueue
-import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 
 // components
@@ -46,10 +44,10 @@ fun componentTest()
             value = rad1
             )
         Spacer( Modifier.height( 5.dp ) )
-        LabeledField(
+        LabeledField2(
             label = "HL Input",
             value = rad2,
-            isEnabled = mutableStateOf(false)
+            isEnabled = false
             )
         Spacer( Modifier.height( 5.dp ) )
         LabeledField(
@@ -85,13 +83,30 @@ fun componentTest()
     }
 }
 
-// TODO : checking if all input correct
+@Composable
+fun scanBoxTest()
+{
+    val one = ScanQueue( startingList = listOf( "H", "L", "H", "L", "H", "L", "H", "L", "H", "L", "H", "L", "H", "L" ) )
+    thread {
+        while( !one.isBlocked() )
+        {
+            one.nextItem()
+            Thread.sleep( 500 )
+        }
+    }
+
+    MainColumn {
+        ScanRow( mutableStateOf(one) )
+    }
+}
+
+/*
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun formStyle(
+fun TwinFormOld (
     isEnabled : MutableState<Boolean> = mutableStateOf( true ),
-    gearSystemBuilder : GearSystemBuilder = GearSystemBuilder()
 ) {
+    val gearSystemBuilder by remember { mutableStateOf( GearSystemBuilder() ) }
 
     MainColumn {
         PatheticBorder( "inputables" ) { Column {
@@ -111,17 +126,20 @@ fun formStyle(
                 correctionChecking = { gearSystemBuilder.isDiameterFieldCorrect() }
                 )
             Spacer( Modifier.height( 5.dp ) )
-            LabeledField(
+            /*
+            LabeledField2(
                 label = "detector tick",
-                value = mutableStateOf("")
-                )
+                isEnabled = isEnabled,
+                value = gearSystemBuilder.detectorTick.field,
+                isEnabled = gearSystemBuilder.detectorTick.i
+                ) */
         } }
 
         Spacer( Modifier.height( 15.dp ) )
         PatheticBorder( "calculables" ) { Column {
             LabeledField(
                 label = "max AGS",
-                value = gearSystemBuilder.getMaxAGS(),
+                value = gearSystemBuilder.maxAGS,
                 isEnabled = mutableStateOf( false )
                 )
             Spacer( Modifier.height( 5.dp ) )
@@ -133,8 +151,7 @@ fun formStyle(
         } }
 
         Spacer( Modifier.height( 30.dp ) )
-        Row()
-        {
+        Row {
             if( isEnabled.value )
             {
                 MyButton(
@@ -150,31 +167,92 @@ fun formStyle(
             Spacer( Modifier.weight(1F) )
             MyButton(
                 buttonText = "accept",
-                buttonPos = ButtonPosition.Lonely
+                buttonPos = ButtonPosition.Lonely,
+                isEnabled = gearSystemBuilder.isGearSystemCorrect()
                 )
         }
 
     }
+} */
 
-}
-
+@ExperimentalFoundationApi
 @Composable
-fun scanBoxTest()
-{
-    val one = ScanQueue( startingList = listOf( "H", "L", "H", "L", "H", "L", "H", "L", "H", "L", "H", "L", "H", "L" ) )
-    thread {
-        while( !one.isBlocked() )
-        {
-            one.nextItem()
-            sleep( 500 )
-        }
+fun TwinForm(
+    gearSystem : MutableState<GearSystem>
+) {
+    val gsb by remember { mutableStateOf( GearSystemBuilder() ) }
+
+    @Composable
+    fun ConnectedNumberField (
+        nfm : NumberFieldManager
+    )
+    {
+        LabeledField(
+            label = nfm.label,
+            value = nfm.field,
+            tooltipText = nfm.tooltip,
+            correctionChecking = { nfm.isCorrect },
+            onValueChange = { nfm.onValueChange(); gsb.updateCalculables() }
+            )
     }
 
     MainColumn {
-        ScanRow( mutableStateOf(one) )
+
+        PatheticBorder( "inputables" ) { Column {
+            ConnectedNumberField( gsb.toothAmount )
+            Spacer( Modifier.height( 5.dp ) )
+            ConnectedNumberField( gsb.diameter )
+            Spacer( Modifier.height( 5.dp ) )
+            ConnectedNumberField( gsb.detectorTick )
+        } }
+
+        Spacer( Modifier.height( 10.dp ) )
+        PatheticBorder( "calculables" ) { Column {
+            LabeledField(
+                label = "area angle",
+                tooltipText = "calculated in radians",
+                value = gsb.areaAngle,
+                isEnabled = mutableStateOf(false)
+                )
+            Spacer( Modifier.height( 5.dp ) )
+            LabeledField(
+                label = "max AGS",
+                tooltipText = "calculated in radians per second",
+                value = gsb.maxAGS,
+                isEnabled = mutableStateOf(false)
+                )
+        } }
+
+        Spacer( Modifier.height( 30.dp ) )
+        Row {
+            MyButton(
+                buttonText = "load",
+                buttonPos = ButtonPosition.Left
+                )
+            Spacer( Modifier.width( 3.dp ) )
+            MyButton(
+                buttonText = "save",
+                buttonPos = ButtonPosition.Right
+                )
+            Spacer( Modifier.weight(1F) )
+            MyButton(
+                buttonText = "accept",
+                buttonPos = ButtonPosition.Lonely,
+                isEnabled = gsb.isCorrect,
+                onClick = { gearSystem.value = gsb.build() }
+                )
+        }
+
     }
 }
 
+@Composable
+fun TwinFormDisplay()
+{
+
+}
+
+@ExperimentalFoundationApi
 fun main() = application {
     Window (
         onCloseRequest = ::exitApplication,
@@ -185,6 +263,7 @@ fun main() = application {
             )
         )
     {
-        formStyle()
+        val gearSystem : MutableState<GearSystem> = mutableStateOf(GearSystem())
+        TwinForm( gearSystem )
     }
 }
