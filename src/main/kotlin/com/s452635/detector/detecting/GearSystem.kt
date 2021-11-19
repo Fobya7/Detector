@@ -8,9 +8,26 @@ data class GearSystem(
     val toothAmount : Int = 0,
     val diameter : Int = 0,
     val detectorTick : Int = 0,
-    val AreaAngle : Double = 0.0,
-    val maxAGS : Double = 0.0
-)
+) {
+    val areaAngle : Double = calcAreaAngle( toothAmount )
+    val maxAGS : Double = calcMaxAGS( areaAngle, detectorTick )
+    // TODO : add precision and low speed tolerance
+
+    private fun calcAreaAngle( toothAmount: Int ) : Double
+    {
+        return Math.toRadians( 360 /( 2 * toothAmount.toDouble() ) )
+    }
+
+    private fun calcMaxAGS( areaAngle : Double, detectorTick : Int ) : Double
+    {
+        return areaAngle / detectorTick
+    }
+
+    companion object
+    {
+        const val laserBias : Double = 0.9
+    }
+}
 
 class GearSystemBuilder
 {
@@ -72,15 +89,15 @@ class GearSystemBuilder
     private fun isGearSystemCorrect() : Boolean
     {
         isCorrect.value = toothAmount.isCorrect && diameter.isCorrect && detectorTick.isCorrect
-        println( "in use $isCorrect" )
         return isCorrect.value
     }
 
     fun build() : GearSystem
     {
         return GearSystem (
-            toothAmount.number!!, diameter.number!!, detectorTick.number!!,
-            calcAreaAngle(), calcMaxAGS()
+            toothAmount.number!!,
+            diameter.number!!,
+            detectorTick.number!!
             )
     }
 }

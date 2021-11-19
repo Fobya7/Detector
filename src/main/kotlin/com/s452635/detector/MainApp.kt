@@ -151,6 +151,13 @@ private class ApplicationState
         updateGsLabel()
     }
 
+    fun gsAccepted()
+    {
+        gsOption.value = GsOption.Custom
+        updateButtonLabels()
+        hideGearForm()
+    }
+
     val detectorSt = mutableStateOf( detectorState() )
     private fun detectorState() = DetectorState (
         isAppBusy = isBusy,
@@ -173,7 +180,7 @@ private class ApplicationState
     private fun gearFormState() = GearFormState (
         isOpen = isGearFormVisible,
         gearSystem = gs,
-        gsAccepted = { hideGearForm() }
+        gsAccepted = { gsAccepted() }
     )
 
     // endregion

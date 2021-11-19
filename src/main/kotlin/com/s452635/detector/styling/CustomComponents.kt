@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -442,5 +443,23 @@ class NumberFieldManager (
         isCorrect =
             if( number == null ) false
             else correctionChecking( this )
+    }
+}
+
+@Composable
+fun dippingField (
+    sample : AnnotatedString,
+    width : Dp = 200.dp
+) {
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .width( width )
+            .background( MyColors.DisabledBack, MyShapes.Uneven )
+            .padding( 10.dp )
+    ) {
+        Text (
+            text = sample,
+        )
     }
 }
