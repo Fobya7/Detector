@@ -47,5 +47,3 @@ class ScanQueue(
         }
     }
 }
-
-enum class Scan { H, L } // TODO : use

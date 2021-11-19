@@ -6,24 +6,23 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import com.s452635.detector.styling.MyColors
+import com.s452635.detector.styling.doublePrint
+import kotlin.random.Random
+import kotlin.random.Random.Default.nextBoolean
 import kotlin.random.Random.Default.nextInt
-
-enum class SpinDirection { Right, Left, Stop }
 
 class GenValues( private val gearSystem : GearSystem )
 {
-    private val spinDirection : MutableState<SpinDirection> = mutableStateOf( SpinDirection.Stop )
-    private val speed : MutableState<Double> = mutableStateOf( 0.0 )
-    private val speedRatio : MutableState<Double> = mutableStateOf(0.0)
-    private val acceleration = SpeedAcc()
+    private val speed = SpeedAcc()
+    private val scA = Sc( 40 )
+    private val scB = Sc( 0 )
 
     fun run() = Thread { while( true ) {
     Thread.sleep( gearSystem.detectorTick.toLong() )
 
-        acceleration.nextVel()
-        speed.value = acceleration.velValue.toDouble()
-
-        println( acceleration )
+        speed.newVel()
+        scA.bumpBy( speed.getSpeed() )
+        scB.bumpBy( speed.getSpeed() )
 
     } }.start()
 
@@ -40,30 +39,78 @@ class GenValues( private val gearSystem : GearSystem )
             append( " " )
         }
 
+        appendCategory( "scA / scB" )
+        append(    "${scA.areaType.value}(${scA.areaProc.value/100.0})" +
+                " / ${scB.areaType.value}(${scB.areaProc.value/100.0})" ); append( "\n" )
+        append( "\n" )
+
         appendCategory( "speed" )
-        append( "${acceleration.velValue}" ); append( "\n" )
-        appendCategory( "acceleration" )
-        append( "${acceleration.accValue}" ); append( "\n" )
+        append(doublePrint(gearSystem.maxAGS * speed.velValue.value / 100.0)); append( "\n" )
+        appendCategory( "speed ratio" )
+        append( "${speed.velValue.value / 100.0}" ); append( "\n" )
         appendCategory( "spin direction" )
-        append( "${spinDirection.value}" )
+        append( "${speed.velType.value}" ); append( "\n" )
+        append( "\n" )
+
+        appendCategory( "acceleration" )
+        append( "${speed.accValue.value / 100.0}" ); append( "\n" )
+        appendCategory( "acceleration type" )
+        append( "${speed.accType.value}" )
     }
 
-    fun snap() : Pair<Scan,Scan>
+    fun snap() : Pair<Area,Area>
     {
-        return Pair( Scan.H, Scan.L ) // TODO : actual values
+        return Pair( scA.areaType.value, scB.areaType.value )
     }
 }
 
-enum class AccType { Slowing, Speeding }
+enum class Area
+{
+    H { override fun flip() : Area { return L } },
+    L { override fun flip() : Area { return H } };
+
+    abstract fun flip() : Area
+}
+class Sc(
+    startingProc : Int,
+    startingArea : Area = Area.H
+    )
+{
+    val areaProc : MutableState<Int> = mutableStateOf( startingProc )
+    val areaType : MutableState<Area> = mutableStateOf( startingArea )
+
+    fun bumpBy( step : Int )
+    {
+        areaProc.value += step
+
+        if( areaProc.value > 100 )
+        {
+            areaProc.value -= 100
+            areaType.value = areaType.value.flip()
+        } else
+        if( areaProc.value < 0 )
+        {
+            areaProc.value += 100
+            areaType.value = areaType.value.flip()
+        }
+    }
+}
+
+enum class SpinDir { Right, Left, Stop }
+enum class AccType { Slowing, Speeding, None }
 class SpeedAcc
 {
-    var accType : AccType = AccType.Speeding
-    var accValue : Int = 0 // values between 0 and 0.1
-    fun getAccValue() : Double { return accValue / 100.0 }
+    val accType : MutableState<AccType> = mutableStateOf( AccType.None )
+        // values between 0 and 10
+        private val maxAcc = 10
+    val accValue : MutableState<Int> = mutableStateOf(0)
+    fun getAccValue() : Double { return accValue.value / 100.0 }
 
-    var velType = SpinDirection.Left
-    var velValue : Int = 0 // values between 0 and 0.9
-    private fun getVelValue() : Double { return velValue / 100.0 }
+    val velType : MutableState<SpinDir> = mutableStateOf(SpinDir.Stop)
+        // values between 0 and 90
+    val velValue : MutableState<Int> = mutableStateOf(0)
+    private val maxVel = 90
+    fun getVelValue() : Double { return velValue.value / 100.0 }
 
     private fun rollAccChange() : Int
     {
@@ -74,58 +121,101 @@ class SpeedAcc
             else -> 0
         }
     }
-    fun nextVel()
+    private fun rollAccType()
+    {
+        accType.value = when( Random.nextBoolean() )
+        {
+            true ->  AccType.Speeding
+            false -> AccType.Slowing
+        }
+    }
+    private fun nextAcc()
     {
         val accChange = rollAccChange()
-        when( accValue )
+        if( accChange == 0 ) { return }
+
+        // region extreme cases
+
+        if( accValue.value == maxAcc )
         {
-            0 -> { accValue += accChange }
-            10 -> { accValue -= accChange }
-            else -> when( nextInt( 1, 3 ) )
+            accValue.value -= accChange
+            return
+        }
+
+        if( accValue.value == 0 )
+        {
+            accValue.value += accChange
+            rollAccType()
+            return
+        }
+
+        // endregion
+
+        when( Random.nextBoolean() )
+        {
+            true ->
             {
-                1 -> { accValue += accChange }
-                2 -> { accValue -= accChange }
+                accValue.value += accChange
+                if( accValue.value > maxAcc ) { accValue.value = maxAcc }
             }
-        }
-
-        if( accValue == 0 )
-        {
-            accType = if( velValue == 0 ) {
-                AccType.Speeding
-            }
-            else {
-                when(nextInt(1, 3))
-                {
-                    1 -> AccType.Speeding
-                    else -> AccType.Slowing
-                }
-            }
-        }
-
-        when( accType )
-        {
-            AccType.Speeding -> {
-                velValue += accValue
-                if( velValue < 0 ) { velValue = 0 }
-                }
-            AccType.Slowing -> {
-                velValue -= accValue
-                if( velValue > 90 ) { velValue = 90 }
-                }
-        }
-
-        if( velValue == 0 )
-        {
-            velType = when( nextInt( 1, 2 ) )
+            false ->
             {
-                1 -> SpinDirection.Right
-                else -> SpinDirection.Left
+                accValue.value -= accChange
+                if( accValue.value < 0 ) { accValue.value = 0 }
+            }
+        }
+
+        if( accValue.value == 0 )
+        {
+            accType.value = AccType.None
+        }
+    }
+
+    fun newVel()
+    {
+        nextAcc()
+        when( accType.value )
+        {
+            AccType.Speeding ->
+            {
+                velValue.value += accValue.value
+                if( velValue.value > maxVel ) { velValue.value = maxVel }
+            }
+            AccType.Slowing ->
+            {
+                velValue.value -= accValue.value
+                if( velValue.value < 0 ) { velValue.value = 0 }
+            }
+            else -> {}
+        }
+
+        if( velValue.value == maxVel || velValue.value == 0 )
+        {
+            accType.value = AccType.None
+            accValue.value = 0
+        }
+
+        if( velValue.value == 0 )
+        {
+             velType.value = SpinDir.Stop
+        }
+        if( velValue.value != 0 && velType.value == SpinDir.Stop )
+        {
+            velType.value = when( nextBoolean() )
+            {
+                true -> SpinDir.Right
+                false -> SpinDir.Left
             }
         }
     }
 
-    override fun toString() : String
+    fun getSpeed() : Int
     {
-        return "speed: ${getVelValue()}, dir: $velType"
+        return when( velType.value )
+        {
+            SpinDir.Left -> + velValue.value
+            SpinDir.Right -> - velValue.value
+            else -> 0
+        }
     }
 }
