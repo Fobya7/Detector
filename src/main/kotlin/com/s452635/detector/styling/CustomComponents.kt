@@ -449,7 +449,7 @@ class NumberFieldManager (
 @Composable
 fun dippingField (
     sample : AnnotatedString,
-    width : Dp = 200.dp
+    width : Dp = 300.dp
 ) {
     Row (
         verticalAlignment = Alignment.CenterVertically,

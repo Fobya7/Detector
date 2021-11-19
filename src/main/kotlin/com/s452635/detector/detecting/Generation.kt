@@ -6,27 +6,26 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import com.s452635.detector.styling.MyColors
-import kotlin.random.Random
+import kotlin.random.Random.Default.nextInt
 
 enum class SpinDirection { Right, Left, Stop }
-enum class SpeedType { Falling, Const, Raising }
 
 class GenValues( private val gearSystem : GearSystem )
 {
-    val spinDirection : MutableState<SpinDirection> = mutableStateOf( SpinDirection.Stop )
-    val speed : MutableState<Int> = mutableStateOf(2)
+    private val spinDirection : MutableState<SpinDirection> = mutableStateOf( SpinDirection.Stop )
+    private val speed : MutableState<Double> = mutableStateOf( 0.0 )
+    private val speedRatio : MutableState<Double> = mutableStateOf(0.0)
+    private val acceleration = SpeedAcc()
 
-    fun run() {
+    fun run() = Thread { while( true ) {
+    Thread.sleep( gearSystem.detectorTick.toLong() )
 
-        val thread = Thread {
-            while( true ) {
-                Thread.sleep( gearSystem.detectorTick.toLong() )
-                speed.value += Random.nextInt( 1, 6 ) -3
-            }
-        }
+        acceleration.nextVel()
+        speed.value = acceleration.velValue.toDouble()
 
-        thread.start()
-    }
+        println( acceleration )
+
+    } }.start()
 
     fun buildString() = buildAnnotatedString {
         fun appendCategory(
@@ -40,8 +39,11 @@ class GenValues( private val gearSystem : GearSystem )
             pop()
             append( " " )
         }
+
         appendCategory( "speed" )
-        append( "${speed.value}" ); append( "\n" )
+        append( "${acceleration.velValue}" ); append( "\n" )
+        appendCategory( "acceleration" )
+        append( "${acceleration.accValue}" ); append( "\n" )
         appendCategory( "spin direction" )
         append( "${spinDirection.value}" )
     }
@@ -52,36 +54,78 @@ class GenValues( private val gearSystem : GearSystem )
     }
 }
 
-private class Acceleration
+enum class AccType { Slowing, Speeding }
+class SpeedAcc
 {
-    var value : MutableState<Int> = mutableStateOf( 0 )
+    var accType : AccType = AccType.Speeding
+    var accValue : Int = 0 // values between 0 and 0.1
+    fun getAccValue() : Double { return accValue / 100.0 }
 
-    fun get() : Int
+    var velType = SpinDirection.Left
+    var velValue : Int = 0 // values between 0 and 0.9
+    private fun getVelValue() : Double { return velValue / 100.0 }
+
+    private fun rollAccChange() : Int
     {
-        return value.value
+        return when( nextInt( 0, 100 ) )
+        {
+            in 10..39 -> 1
+            in 40..50 -> 2
+            else -> 0
+        }
+    }
+    fun nextVel()
+    {
+        val accChange = rollAccChange()
+        when( accValue )
+        {
+            0 -> { accValue += accChange }
+            10 -> { accValue -= accChange }
+            else -> when( nextInt( 1, 3 ) )
+            {
+                1 -> { accValue += accChange }
+                2 -> { accValue -= accChange }
+            }
+        }
+
+        if( accValue == 0 )
+        {
+            accType = if( velValue == 0 ) {
+                AccType.Speeding
+            }
+            else {
+                when(nextInt(1, 3))
+                {
+                    1 -> AccType.Speeding
+                    else -> AccType.Slowing
+                }
+            }
+        }
+
+        when( accType )
+        {
+            AccType.Speeding -> {
+                velValue += accValue
+                if( velValue < 0 ) { velValue = 0 }
+                }
+            AccType.Slowing -> {
+                velValue -= accValue
+                if( velValue > 90 ) { velValue = 90 }
+                }
+        }
+
+        if( velValue == 0 )
+        {
+            velType = when( nextInt( 1, 2 ) )
+            {
+                1 -> SpinDirection.Right
+                else -> SpinDirection.Left
+            }
+        }
     }
 
-    fun roll()
+    override fun toString() : String
     {
-        when( Random.nextInt( 1, 100 ) )
-        {
-            in 1..10  -> value.value + 1
-            in 11..20 -> value.value - 1
-            else -> {}
-        }
+        return "speed: ${getVelValue()}, dir: $velType"
     }
 }
-
-/*
-    private val lastAcceleration = mutableStateOf( 0 )
-    private fun rollAcceleration()
-    {
-        val lA = lastAcceleration.value
-        when( Random.nextInt( 1, 100 ) )
-        {
-            in 1..10  -> if( lA > 0 )   { lastAcceleration.value - 1 }
-            in 11..15 -> if( lA < 100 ) { lastAcceleration.value + 1 }
-            else -> {}
-        }
-    }
- */
