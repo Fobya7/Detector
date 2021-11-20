@@ -8,6 +8,8 @@ import com.s452635.detector.detecting.GearSystem
 import com.s452635.detector.detecting.GenValues
 import com.s452635.detector.windows.*
 import java.io.File
+import java.lang.Thread.sleep
+import kotlin.math.floor
 
 @ExperimentalFoundationApi
 fun main() = application {
@@ -32,13 +34,64 @@ private class ApplicationState
 
     // endregion
 
-    // region program management
+    // region app synchronisation
 
     var isBusy = mutableStateOf( false )
     fun makeBusy() { isBusy.value = true }
     fun makeNotBusy() { isBusy.value = false }
 
-    val programOption = mutableStateOf( ProgramOption.Init )
+    val programState = mutableStateOf( ProgramState.Init )
+    fun pauseProgram()
+    {
+        if( programState.value == ProgramState.Working )
+            programState.value = ProgramState.Paused
+    }
+    fun unpauseProgram()
+    {
+        if( programState.value == ProgramState.Paused )
+            programState.value = ProgramState.Working
+    }
+    fun startProgram()
+    {
+        // TODO : check starting ability (?)
+        if( programState.value == ProgramState.Init )
+            programState.value = ProgramState.Working
+    }
+    fun abandonProgram()
+    {
+        // TODO : clearing variables, probably
+        if( programState.value == ProgramState.Paused )
+            programState.value = ProgramState.Init
+    }
+
+    fun mainThread()
+    {
+        // TODO : more setting up
+        val generator = GenValues( gs.value )
+        val actualTick = floor( gs.value.detectorTick / 2.0 ).toLong()
+
+        generator.firstStep()
+        showGenerator()
+        startProgram()
+
+        val genThread = Thread {
+            while(programState.value == ProgramState.Working)
+            {
+                sleep(actualTick)
+                generator.step()
+
+                sleep(actualTick)
+                // TODO : use those values
+                println(generator.snap())
+            }
+        }
+        genThread.start()
+    }
+
+    // endregion
+
+    // region program management
+
     val hlOption = mutableStateOf( HlOption.None )
     val gsOption = mutableStateOf( GsOption.None )
 
@@ -59,7 +112,7 @@ private class ApplicationState
 
     // region window functions
 
-    var canStart = mutableStateOf( false )
+    val canStart = mutableStateOf( false )
     fun checkIfCanStart()
     {
         canStart.value = hlOption.value != HlOption.None && gsOption.value != GsOption.None
@@ -67,6 +120,7 @@ private class ApplicationState
     fun startButton()
     {
         // TODO : check if selected file is correct
+        mainThread()
     }
 
     fun hlButton()
@@ -82,9 +136,9 @@ private class ApplicationState
             checkIfCanStart()
         }
 
-        when( programOption.value )
+        when( programState.value )
         {
-            ProgramOption.Init ->
+            ProgramState.Init ->
             {
                 makeBusy()
                 hlInputChoice()
@@ -101,9 +155,9 @@ private class ApplicationState
     }
     fun gsButton()
     {
-        when( programOption.value )
+        when( programState.value )
         {
-            ProgramOption.Init ->
+            ProgramState.Init ->
             {
                 // makeBusy()
                 showGearForm()
@@ -112,6 +166,8 @@ private class ApplicationState
             }
             else -> {}
         }
+
+        checkIfCanStart()
     }
 
     val gsLabel = mutableStateOf( "none" )
@@ -162,7 +218,7 @@ private class ApplicationState
     val detectorSt = mutableStateOf( detectorState() )
     private fun detectorState() = DetectorState (
         isAppBusy = isBusy,
-        startButton = ::hideGenerator,
+        startButton = ::startButton,
         hlButton = ::hlButton,
         gsButton = ::gsButton,
         gsButtonEnabled = isGsButtonEnabled,
@@ -192,4 +248,4 @@ private class ApplicationState
 
 enum class HlOption { None, LiveGeneration, FromTxtFile, FromHlFile }
 enum class GsOption { None, FromHlFile, FromGearFile, Custom }
-enum class ProgramOption { Init, Working }
+enum class ProgramState { Init, Working, Paused }

@@ -10,6 +10,7 @@ import com.s452635.detector.detecting.GenValues
 import com.s452635.detector.styling.doublePrint
 import com.s452635.detector.windows.GeneratorContent
 import org.junit.jupiter.api.Test
+import java.lang.Thread.sleep
 
 internal class GeneratorTest
 {
@@ -31,7 +32,17 @@ internal class GeneratorTest
     fun simpleTest() = application {
 
         val genValues = GenValues( gearSystem )
-        genValues.run()
+        val thread = Thread {
+            while( true ) {
+                sleep( 200 )
+                genValues.step()
+            }
+        }
+
+        genValues.firstStep()
+        thread.start()
+
+        // genValues.run()
 
         Window (
             onCloseRequest = ::exitApplication,

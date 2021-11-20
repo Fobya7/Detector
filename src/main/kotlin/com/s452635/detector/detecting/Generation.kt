@@ -7,6 +7,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import com.s452635.detector.styling.MyColors
 import com.s452635.detector.styling.doublePrint
+import java.lang.Thread.sleep
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextBoolean
 import kotlin.random.Random.Default.nextInt
@@ -17,12 +18,23 @@ class GenValues( private val gearSystem : GearSystem )
     private val scA = Sc( 40 )
     private val scB = Sc( 0 )
 
-    fun run() = Thread { while( true ) {
-    Thread.sleep( gearSystem.detectorTick.toLong() )
-
+    // TODO : fix window flicker
+    fun firstStep()
+    {
+        sleep( 100 )
+        step()
+    }
+    fun step()
+    {
         speed.newVel()
         scA.bumpBy( speed.getSpeed() )
         scB.bumpBy( speed.getSpeed() )
+    }
+
+    fun run() = Thread { while( true ) {
+    Thread.sleep( gearSystem.detectorTick.toLong() )
+
+        step()
 
     } }.start()
 
