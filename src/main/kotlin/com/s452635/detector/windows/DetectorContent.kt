@@ -12,10 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.*
 import com.s452635.detector.styling.*
 
 class DetectorState(
@@ -26,7 +23,8 @@ class DetectorState(
     val gsButton : () -> Unit,
     val gsButtonEnabled : MutableState<Boolean>,
     val startButtonEnabled : MutableState<Boolean>,
-    val gsLabel : MutableState<String>
+    val gsLabel : MutableState<String>,
+    val openGen : () -> Unit
 )
 
 @Composable
@@ -42,6 +40,11 @@ fun ApplicationScope.DetectorWindow(
         )
     )
 {
+    MenuBar {
+        Menu( "File" ) {
+            Item( "open generator", onClick = detectorState.openGen )
+        }
+    }
     DetectorContent(
         startButton = detectorState.startButton,
         hlInputButton = detectorState.hlButton,
@@ -61,7 +64,7 @@ fun DetectorContent(
     gsButton : () -> Unit,
     gsButtonEnabled : MutableState<Boolean>,
     startButtonEnabled : MutableState<Boolean>,
-    gsLabel : MutableState<String>
+    gsLabel : MutableState<String>,
 ) {
     MainColumn {
 

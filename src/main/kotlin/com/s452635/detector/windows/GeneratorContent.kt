@@ -14,7 +14,7 @@ import com.s452635.detector.styling.dippingField
 class GeneratorState(
     val isAppBusy : MutableState<Boolean>,
     val isOpen : MutableState<Boolean>,
-    // val genValues : GenValues = GenValues(  )
+    val genValues : GenValues
 )
 
 @Composable
@@ -31,7 +31,7 @@ fun GeneratorWindow(
         )
     )
 {
-    // GeneratorContent( generatorState.genValues )
+    GeneratorContent( generatorState.genValues )
 }
 
 @Composable

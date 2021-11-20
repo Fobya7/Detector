@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
 import com.s452635.detector.detecting.GearSystem
+import com.s452635.detector.detecting.GenValues
 import com.s452635.detector.windows.*
 import java.io.File
 
@@ -168,12 +169,14 @@ private class ApplicationState
         startButtonEnabled = canStart,
         hlLabel = hlLabel,
         gsLabel = gsLabel,
+        openGen = ::showGenerator
     )
 
     val generatorSt = mutableStateOf( generatorState() )
     private fun generatorState() = GeneratorState (
         isAppBusy = isBusy,
-        isOpen = isGeneratorVisible
+        isOpen = isGeneratorVisible,
+        genValues = GenValues( gearSystem = gs.value )
     )
 
     val gearFormState = mutableStateOf( gearFormState() )
