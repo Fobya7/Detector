@@ -1,6 +1,6 @@
 
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
@@ -34,24 +34,23 @@ internal class GeneratorTest
         val genValues = GenValues( gearSystem )
         val thread = Thread {
             while( true ) {
-                sleep( 200 )
+                sleep( 250 )
                 genValues.step()
+                sleep( 250 )
+                println(genValues.snap())
             }
         }
 
-        genValues.firstStep()
         thread.start()
-
-        // genValues.run()
 
         Window (
             onCloseRequest = ::exitApplication,
             title = "The Generator",
             state = WindowState(
-                position = WindowPosition( Alignment.Center ),
-                size = DpSize.Unspecified
-                )
+                position = WindowPosition(Alignment.Center),
+                width = Dp.Unspecified, height = Dp.Unspecified
             )
+        )
         {
             GeneratorContent( genValues )
         }

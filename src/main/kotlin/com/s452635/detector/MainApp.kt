@@ -64,27 +64,26 @@ private class ApplicationState
             programState.value = ProgramState.Init
     }
 
+    val generator = mutableStateOf( GenValues() )
     fun mainThread()
     {
-        // TODO : more setting up
-        val generator = GenValues( gs.value )
+        generator.value = GenValues( gs.value )
+
         val actualTick = floor( gs.value.detectorTick / 2.0 ).toLong()
-
-        generator.firstStep()
-        showGenerator()
-        startProgram()
-
         val genThread = Thread {
             while(programState.value == ProgramState.Working)
             {
-                sleep(actualTick)
-                generator.step()
+                sleep( actualTick )
+                generator.value.step()
 
-                sleep(actualTick)
                 // TODO : use those values
-                println(generator.snap())
+                sleep( actualTick )
+                println(generator.value.snap())
             }
         }
+
+        showGenerator()
+        startProgram()
         genThread.start()
     }
 
@@ -232,7 +231,7 @@ private class ApplicationState
     private fun generatorState() = GeneratorState (
         isAppBusy = isBusy,
         isOpen = isGeneratorVisible,
-        genValues = GenValues( gearSystem = gs.value )
+        genValues = generator
     )
 
     val gearFormState = mutableStateOf( gearFormState() )

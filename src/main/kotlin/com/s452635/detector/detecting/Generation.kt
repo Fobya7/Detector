@@ -12,16 +12,20 @@ import kotlin.random.Random
 import kotlin.random.Random.Default.nextBoolean
 import kotlin.random.Random.Default.nextInt
 
-class GenValues( private val gearSystem : GearSystem )
+private val defaultGearSystem = GearSystem (
+    toothAmount = 12,
+    diameter = 10,
+    detectorTick = 1000
+    )
+class GenValues( private val gearSystem : GearSystem = defaultGearSystem )
 {
     private val speed = SpeedAcc()
     private val scA = Sc( 40 )
     private val scB = Sc( 0 )
 
-    // TODO : fix window flicker
     fun firstStep()
     {
-        sleep( 100 )
+        sleep( 500 )
         step()
     }
     fun step()
