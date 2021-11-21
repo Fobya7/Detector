@@ -1,5 +1,14 @@
 # Detector
 
+## Praca Nad Projektem
+
+Na wstępie muszę powiedzieć, że czas przerósł moje ambicje i projekt zawiera kilka ślepych uliczek oraz niektóre jego części nie są tak dopracowane, jakbym chciała. Jednak spędziłam nad nim blisko 30h (jak twierdzi mój system), więc z dumą prezentuję, ile mam.
+
+Niżej znajduje się infografika z moją interpretacją układu oraz przykłady działania. Resztę tej sekcji poświęcam na raport pracy.
+
+Największą trudność sprawiło mi ograniczenie moich pomysłów do moich możliwości i do przydzielonego czasu. Problemem dla mnie było także skupienie się na funkcjonalnościach programu a nie na konstrukcji jego interfejsu - sporo czasu spędziłam na przykład ucząc się frameworku desktop-compose.
+Ciekawszymi problemami było...
+
 ## Inner Workings
 
 ![image](https://github.com/s452635/Detector/blob/master/AGS_diagram.png)
