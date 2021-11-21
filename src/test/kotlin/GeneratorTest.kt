@@ -1,17 +1,17 @@
 
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.WindowState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.window.application
+import com.s452635.detector.detecting.FileValues
 import com.s452635.detector.detecting.GearSystem
 import com.s452635.detector.detecting.GenValues
 import com.s452635.detector.styling.doublePrint
-import com.s452635.detector.windows.GeneratorContent
+import com.s452635.detector.windows.GeneratorState
+import com.s452635.detector.windows.GeneratorWindow
 import org.junit.jupiter.api.Test
 import java.lang.Thread.sleep
 
+@ExperimentalFoundationApi
 internal class GeneratorTest
 {
 
@@ -41,19 +41,21 @@ internal class GeneratorTest
             }
         }
 
-        thread.start()
+        // thread.start()
 
-        Window (
-            onCloseRequest = ::exitApplication,
-            title = "The Generator",
-            state = WindowState(
-                position = WindowPosition(Alignment.Center),
-                width = Dp.Unspecified, height = Dp.Unspecified
+        val genState = GeneratorState (
+            isEnabled = mutableStateOf( true ),
+            isVisible = mutableStateOf( true ),
+            isAlone = mutableStateOf( true ),
+            onClose = {},
+            genValues = mutableStateOf( genValues ),
+            fileValues = FileValues(),
+            onClickGenerate = {},
+            onClickDir = {},
+            onClickGS = {}
             )
-        )
-        {
-            GeneratorContent( genValues )
-        }
+
+        GeneratorWindow( genState )
 
     }
 

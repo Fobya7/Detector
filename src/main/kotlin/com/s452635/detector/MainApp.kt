@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
+import com.s452635.detector.detecting.FileValues
 import com.s452635.detector.detecting.GearSystem
 import com.s452635.detector.detecting.GenValues
 import com.s452635.detector.windows.*
@@ -28,9 +29,10 @@ private class ApplicationState
 
     // region valuable variables
 
-    var fileHL = mutableStateOf<File?>( null )
-    var fileGS = mutableStateOf<File?>( null )
+    val fileHL = mutableStateOf<File?>( null )
+    val fileGS = mutableStateOf<File?>( null )
     val gearSystem = mutableStateOf( GearSystem() )
+    val fileValues = FileValues()
 
     // endregion
 
@@ -59,6 +61,8 @@ private class ApplicationState
 
         programState.value = ProgramState.Paused
         detectorSt.value.isStartEnabled.value = true
+        detectorSt.value.menuCanOpenGen.value = false
+        generatorSt.value.isAlone.value = false
 
         mainThread()
     }
@@ -67,8 +71,28 @@ private class ApplicationState
         if( programState.value == ProgramState.Paused ) { return }
 
         // TODO : ask if sure to stop
-        // TODO : clearing variables, probably
+        // TODO : clearing variables, resetting states
         programState.value = ProgramState.Init
+        detectorSt.value.menuCanOpenGen.value = true
+        generatorSt.value.isAlone.value = true
+    }
+    fun programStartGenerating()
+    {
+        if( programState.value != ProgramState.Init ) { return }
+        programState.value = ProgramState.Generating
+
+        makeBusy()
+        otherThread()
+    }
+    fun programStopGenerating()
+    {
+        if( programState.value != ProgramState.Generating ) { return }
+
+        programState.value = ProgramState.Init
+
+        makeNotBusy()
+        hideGenerator()
+        checkIfCanInitProgram()
     }
 
     val inputOptionHL = mutableStateOf( HLOption.None )
@@ -79,7 +103,8 @@ private class ApplicationState
     {
         canInitProgram.value =
             inputOptionHL.value != HLOption.None &&
-            inputOptionGS.value != GSOption.None
+            inputOptionGS.value != GSOption.None &&
+            programState.value == ProgramState.Init
     }
 
     // endregion
@@ -110,6 +135,11 @@ private class ApplicationState
         showGenerator()
         initProgram()
         genThread.start()
+    }
+
+    fun otherThread()
+    {
+        sleep( 2000 )
     }
 
     // endregion
@@ -200,32 +230,49 @@ private class ApplicationState
     private fun detectorState() = DetectorState (
         isEnabled = isAvailable,
         isStartEnabled = mutableStateOf( false ),
-        onClickStartChecked = ::pauseProgram,
-        onClickStartUnchecked = ::unpauseProgram,
+        onClickStartChecked = ::unpauseProgram,
+        onClickStartUnchecked = ::pauseProgram,
         isInitEnabled = canInitProgram,
-        onClickInitChecked = ::abandonProgram,
-        onClickInitUnchecked = ::initProgram,
+        onClickInitChecked = ::initProgram,
+        onClickInitUnchecked = ::abandonProgram,
         labelHL = mutableStateOf("none"),
         isHLEnabled = mutableStateOf( true ),
         onClickHL = ::onClickHL,
         labelGS = mutableStateOf("none"),
         isGSEnabled = mutableStateOf( true ),
-        onClickGS = ::onClickGS
+        onClickGS = ::onClickGS,
+        menuCanOpenGen = mutableStateOf(true),
+        menuOpenGen = ::showGenerator
     )
 
     // endregion
 
     // region generator window
 
-    fun showGenerator() { generatorSt.value.isVisible.value = true }
-    fun hideGenerator() { generatorSt.value.isVisible.value = false }
+    fun showGenerator()
+    {
+        detectorSt.value.menuCanOpenGen.value = false
+
+        generatorSt.value.isVisible.value = true
+    }
+    fun hideGenerator()
+    {
+        detectorSt.value.menuCanOpenGen.value = true
+
+        generatorSt.value.isVisible.value = false
+    }
 
     val generatorSt = mutableStateOf( generatorState() )
     private fun generatorState() = GeneratorState (
         isEnabled = isAvailable,
         isVisible = mutableStateOf( false ),
+        isAlone = mutableStateOf( true ),
         onClose = ::hideGenerator,
-        genValues = generator
+        genValues = generator,
+        onClickGS = ::initGearForm,
+        onClickDir = ::chooseDirToSave,
+        onClickGenerate = ::programStartGenerating,
+        fileValues = fileValues,
     )
 
     // endregion
@@ -252,6 +299,11 @@ private class ApplicationState
         isGearFormVisible.value = false
     }
 
+    fun initGearForm()
+    {
+
+    }
+
     val gearFormState = mutableStateOf( gearFormState() )
     private fun gearFormState() = GearFormState (
         isVisible = isGearFormVisible,
@@ -265,4 +317,4 @@ private class ApplicationState
 
 enum class HLOption { None, LiveGeneration, FromTxtFile, FromHlFile }
 enum class GSOption { None, FromHlFile, FromGearFile, Custom }
-enum class ProgramState { Init, Working, Paused }
+enum class ProgramState { Init, Working, Paused, Generating }

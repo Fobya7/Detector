@@ -152,18 +152,18 @@ fun StereoButton(
     buttonPos : ButtonPosition = ButtonPosition.Lonely,
     buttonSize : ButtonSize = ButtonSize.Tiny,
     isEnabled : MutableState<Boolean> = mutableStateOf( true ),
+    isChecked : MutableState<Boolean> = remember { mutableStateOf( false ) },
     onClickChecked : () -> Unit = {},
     onClickUnchecked : () -> Unit = {}
 ) {
-    val isChecked = remember { mutableStateOf( false ) }
     val backgroundColor = if( isChecked.value ) MyColors.PrimaryDark else MyColors.Primary
     val foregroundColor = if( isChecked.value ) MyColors.DisabledBack else Color.White
 
     fun onClick()
     {
+        isChecked.value = !isChecked.value
         if( isChecked.value ) onClickChecked()
         else onClickUnchecked()
-        isChecked.value = !isChecked.value
     }
 
     Button(

@@ -22,7 +22,9 @@ class DetectorState(
     val onClickHL : () -> Unit,
     val labelGS : MutableState<String>,
     val isGSEnabled : MutableState<Boolean>,
-    val onClickGS : () -> Unit
+    val onClickGS : () -> Unit,
+    val menuCanOpenGen : MutableState<Boolean>,
+    val menuOpenGen : () -> Unit
 )
 
 @Composable
@@ -40,8 +42,11 @@ fun ApplicationScope.DetectorWindow(
 {
     MenuBar {
         Menu( "File" ) {
-            // TODO : make sometimes inaccessible
-            // Item( "open generator", onClick = detectorState.openGen )
+            Item(
+                text = "open generator",
+                onClick = detectorState.menuOpenGen,
+                enabled = detectorState.menuCanOpenGen.value
+            )
         }
     }
     DetectorContent(

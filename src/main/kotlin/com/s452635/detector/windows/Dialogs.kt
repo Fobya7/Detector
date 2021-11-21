@@ -81,3 +81,7 @@ fun chooseHlInput() : Pair<HLOption, File?>?
 
     return null
 }
+fun chooseDirToSave()
+{
+
+}
