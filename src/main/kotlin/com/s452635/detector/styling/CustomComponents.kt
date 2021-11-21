@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.s452635.detector.detecting.ScanQueue
 
+// region < } CONTAINERS { >
+
 @Composable
 fun MainColumn( content: @Composable() (ColumnScope.() -> Unit) )
 {
@@ -41,6 +43,37 @@ fun MainColumn( content: @Composable() (ColumnScope.() -> Unit) )
         )
     }
 }
+
+@Composable
+fun PatheticBorder(
+    labelText: String = "",
+    content : @Composable() (() -> Unit)
+) {
+    Column {
+        if( labelText != "" )
+        {
+            Text(
+                text = labelText,
+                color = MyColors.DisabledBack,
+                fontSize = 13.sp,
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier.padding( 10.dp, 0.dp )
+                )
+        }
+        Column(
+            modifier = Modifier
+                .height( IntrinsicSize.Max )
+                .border( 1.dp, MyColors.DisabledBack )
+                .padding( 10.dp ),
+        ) {
+            content()
+        }
+    }
+}
+
+// endregion
+
+// region < } BUTTONS { >
 
 @Composable
 fun LabeledButton(
@@ -87,7 +120,97 @@ fun LabeledButton(
     }
 }
 
-// TODO : switch to LabelField2
+@Composable
+fun MyButton(
+    buttonText : String = "",
+    onClick : () -> Unit = {},
+    isEnabled : MutableState<Boolean> = mutableStateOf(true),
+    buttonPos : ButtonPosition = ButtonPosition.Lonely,
+    buttonSize : ButtonSize = ButtonSize.Tiny
+) {
+    Button(
+        content = { Text( buttonText, color = Color.White ) },
+        contentPadding = PaddingValues( 20.dp, 0.dp ),
+        onClick = onClick,
+        enabled = isEnabled.value,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MyColors.Primary,
+            disabledBackgroundColor = MyColors.DisabledMain
+            ),
+        shape = buttonShape( buttonPos ),
+        modifier = Modifier
+            .height( when( buttonSize ) {
+                ButtonSize.Tiny -> 30.dp
+                ButtonSize.Biggie -> 50.dp
+                })
+        )
+}
+
+@Composable
+fun StereoButton(
+    text : String,
+    buttonPos : ButtonPosition = ButtonPosition.Lonely,
+    buttonSize : ButtonSize = ButtonSize.Tiny,
+    isEnabled : MutableState<Boolean> = mutableStateOf( true ),
+    onClickChecked : () -> Unit = {},
+    onClickUnchecked : () -> Unit = {}
+) {
+    val isChecked = remember { mutableStateOf( false ) }
+    val backgroundColor = if( isChecked.value ) MyColors.PrimaryDark else MyColors.Primary
+    val foregroundColor = if( isChecked.value ) MyColors.DisabledBack else Color.White
+
+    fun onClick()
+    {
+        if( isChecked.value ) onClickChecked()
+        else onClickUnchecked()
+        isChecked.value = !isChecked.value
+    }
+
+    Button(
+        content = { Text(
+            text = text,
+            color = foregroundColor,
+            fontSize = if( buttonSize == ButtonSize.Biggie ) 18.sp else 12.sp
+            ) },
+        contentPadding = PaddingValues( 10.dp, 0.dp ),
+        enabled = isEnabled.value,
+        onClick = ::onClick,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = backgroundColor,
+            disabledBackgroundColor = MyColors.DisabledMain
+            ),
+        shape = buttonShape( buttonPos ),
+        modifier = Modifier
+            .height( when( buttonSize ) {
+                ButtonSize.Tiny -> 30.dp
+                ButtonSize.Biggie -> 65.dp
+                })
+        )
+}
+
+fun buttonShape( buttonPos: ButtonPosition ) : Shape
+{
+    return when( buttonPos )
+    {
+        ButtonPosition.Lonely -> MyShapes.Uneven
+        ButtonPosition.Left -> MyShapes.UnevenLeft
+        ButtonPosition.Center -> MyShapes.Even
+        ButtonPosition.Right -> MyShapes.UnevenRight
+    }
+}
+enum class ButtonPosition
+{
+    Lonely, Center, Right, Left
+}
+enum class ButtonSize
+{
+    Biggie, Tiny
+}
+
+// endregion
+
+// region < } LABELED FIELD { >
+
 @ExperimentalFoundationApi
 @Composable
 fun LabeledField(
@@ -188,224 +311,53 @@ fun LabeledField(
 
     }
 }
-@ExperimentalFoundationApi
-@Composable
-fun LabeledField2(
-    label: String,
-    value: MutableState<String>,
-    onValueChange: () -> Unit = {},
-    isEnabled: Boolean = true,
-    isCorrect: Boolean = true,
-    width: Dp = 270.dp,
-    labelFraction: Float = 0.42F,
-    tooltipText : String? = null
+
+class NumberFieldManager (
+    val label : String = "no name",
+    val tooltip : String = "no tooltip",
+    val correctionChecking : ( NumberFieldManager ) -> Boolean
 ) {
+    val field : MutableState<String> = mutableStateOf("")
+    var number : Int? = null
+    var isCorrect : Boolean = false
 
-    @Composable
-    fun tooltipInsides()
+    fun onValueChange()
     {
-        if( tooltipText == null ) { return }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .background( MyColors.GhostlyBackground )
-                .padding( 10.dp, 5.dp )
-            )
+        fun isFieldADigit() : Boolean
         {
-            Text(
-                text = tooltipText,
-                fontSize = 12.sp,
-                color = MyColors.GhostlyGray,
-                fontStyle = FontStyle.Italic
-                )
+            field ?: return false
+            if( !field.value.matches( Regex("\\d++") ) ) { return false }
+
+            return true
         }
 
+        number =
+            if( isFieldADigit() ) field.value.toInt()
+            else null
+
+        isCorrect =
+            if( number == null ) false
+            else correctionChecking( this )
     }
-
-    fun mostColor() : Color
-    {
-        if( !isEnabled ) return MyColors.DisabledMain
-        if( !isCorrect ) return MyColors.IncorrectRed
-        return MyColors.Primary
-    }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height( 30.dp )
-            .width( width )
-            .background(
-                color = if( isEnabled ) Color.White else MyColors.DisabledBack,
-                shape = MyShapes.Uneven
-                )
-            .border(
-                width =  2.dp,
-                color = mostColor(),
-                shape = MyShapes.Uneven
-                )
-    )
-    {
-        TooltipArea(
-            tooltip = { tooltipInsides() },
-            tooltipPlacement = TooltipPlacement.CursorPoint(
-                offset = DpOffset(10.dp, 0.dp)
-                )
-            )
-        {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(
-                        color = mostColor(),
-                        shape = MyShapes.UnevenLeft
-                        )
-                    .fillMaxHeight()
-                    .fillMaxWidth( labelFraction )
-                )
-            {
-                Text(
-                    text = label,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding( 10.dp, 0.dp )
-                    )
-            }
-        }
-        BasicTextField(
-            value = value.value,
-            onValueChange = { value.value = it; onValueChange() },
-            readOnly = !isEnabled,
-            maxLines = 1,
-            textStyle = TextStyle(
-                color = if(isEnabled) Color.Black else MyColors.DisabledMain,
-                fontStyle = if(isEnabled) FontStyle.Normal else FontStyle.Italic
-            ),
-            modifier = Modifier
-                .padding(10.dp, 0.dp)
-        )
-
-    }
-}
-
-
-// region < } BUTTONS { >
-
-@Composable
-fun MyButton(
-    buttonText : String = "",
-    onClick : () -> Unit = {},
-    isEnabled : MutableState<Boolean> = mutableStateOf(true),
-    buttonPos : ButtonPosition = ButtonPosition.Lonely,
-    buttonSize : ButtonSize = ButtonSize.Tiny
-) {
-    Button(
-        content = { Text( buttonText, color = Color.White ) },
-        contentPadding = PaddingValues( 20.dp, 0.dp ),
-        onClick = onClick,
-        enabled = isEnabled.value,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = MyColors.Primary,
-            disabledBackgroundColor = MyColors.DisabledMain
-            ),
-        shape = buttonShape( buttonPos ),
-        modifier = Modifier
-            .height( when( buttonSize ) {
-                ButtonSize.Tiny -> 30.dp
-                ButtonSize.Biggie -> 50.dp
-                })
-        )
-}
-
-@Composable
-fun StereoButton(
-    text : String,
-    buttonPos : ButtonPosition = ButtonPosition.Lonely,
-    buttonSize : ButtonSize = ButtonSize.Tiny,
-    isEnabled : MutableState<Boolean> = mutableStateOf( true ),
-    onClickChecked : () -> Unit = {},
-    onClickUnchecked : () -> Unit = {}
-) {
-    val isChecked = remember { mutableStateOf( false ) }
-    val backgroundColor = if( isChecked.value ) MyColors.PrimaryDark else MyColors.Primary
-    val foregroundColor = if( isChecked.value ) MyColors.DisabledBack else Color.White
-
-    fun onClick()
-    {
-        if( isChecked.value ) onClickChecked()
-        else onClickUnchecked()
-        isChecked.value = !isChecked.value
-    }
-
-    Button(
-        content = { Text(
-            text = text,
-            color = foregroundColor,
-            fontSize = if( buttonSize == ButtonSize.Biggie ) 18.sp else 12.sp
-            ) },
-        contentPadding = PaddingValues( 10.dp, 0.dp ),
-        enabled = isEnabled.value,
-        onClick = ::onClick,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor,
-            disabledBackgroundColor = MyColors.DisabledMain
-            ),
-        shape = buttonShape( buttonPos ),
-        modifier = Modifier
-            .height( when( buttonSize ) {
-                ButtonSize.Tiny -> 30.dp
-                ButtonSize.Biggie -> 65.dp
-                })
-        )
-}
-
-fun buttonShape( buttonPos: ButtonPosition ) : Shape
-{
-    return when( buttonPos )
-    {
-        ButtonPosition.Lonely -> MyShapes.Uneven
-        ButtonPosition.Left -> MyShapes.UnevenLeft
-        ButtonPosition.Center -> MyShapes.Even
-        ButtonPosition.Right -> MyShapes.UnevenRight
-    }
-}
-enum class ButtonPosition
-{
-    Lonely, Center, Right, Left
-}
-enum class ButtonSize
-{
-    Biggie, Tiny
 }
 
 // endregion
 
-
 @Composable
-fun PatheticBorder(
-    labelText: String = "",
-    content : @Composable() (() -> Unit)
+fun DippingField (
+    sample : AnnotatedString,
+    width : Dp = 270.dp
 ) {
-    Column {
-        if( labelText != "" )
-        {
-            Text(
-                text = labelText,
-                color = MyColors.DisabledBack,
-                fontSize = 13.sp,
-                fontStyle = FontStyle.Italic,
-                modifier = Modifier.padding( 10.dp, 0.dp )
-                )
-        }
-        Column(
-            modifier = Modifier
-                .height( IntrinsicSize.Max )
-                .border( 1.dp, MyColors.DisabledBack )
-                .padding( 10.dp ),
-        ) {
-            content()
-        }
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .width( width )
+            .background( MyColors.DisabledBack, MyShapes.Uneven )
+            .padding( 10.dp )
+    ) {
+        Text (
+            text = sample,
+        )
     }
 }
 
@@ -473,49 +425,3 @@ fun ScanRow(
     }
 }
 
-class NumberFieldManager (
-    val label : String = "no name",
-    val tooltip : String = "no tooltip",
-    val correctionChecking : ( NumberFieldManager ) -> Boolean
-) {
-    val field : MutableState<String> = mutableStateOf("")
-    var number : Int? = null
-    var isCorrect : Boolean = false
-
-    fun onValueChange()
-    {
-        fun isFieldADigit() : Boolean
-        {
-            field ?: return false
-            if( !field.value.matches( Regex("\\d++") ) ) { return false }
-
-            return true
-        }
-
-        number =
-            if( isFieldADigit() ) field.value.toInt()
-            else null
-
-        isCorrect =
-            if( number == null ) false
-            else correctionChecking( this )
-    }
-}
-
-@Composable
-fun dippingField (
-    sample : AnnotatedString,
-    width : Dp = 270.dp
-) {
-    Row (
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .width( width )
-            .background( MyColors.DisabledBack, MyShapes.Uneven )
-            .padding( 10.dp )
-    ) {
-        Text (
-            text = sample,
-        )
-    }
-}

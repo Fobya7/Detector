@@ -14,7 +14,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.s452635.detector.detecting.GenValues
 import com.s452635.detector.styling.LabeledButton
 import com.s452635.detector.styling.MainColumn
-import com.s452635.detector.styling.dippingField
+import com.s452635.detector.styling.DippingField
 
 class GeneratorState(
     val isEnabled : MutableState<Boolean>,
@@ -55,6 +55,6 @@ fun GeneratorContent(
             buttonFraction = 0.5F
             )
         Spacer( Modifier.height( 10.dp ) )
-        dippingField( generatorState.genValues.value.buildString() )
+        DippingField( generatorState.genValues.value.buildString() )
     }
 }

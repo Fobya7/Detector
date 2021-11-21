@@ -22,7 +22,6 @@ fun componentTest()
     val rad1 = mutableStateOf("")
     val rad2 = mutableStateOf("unchangeable")
     val rad3 = mutableStateOf("just plain wrong")
-    val rad4 = mutableStateOf("hewp")
 
     MainColumn {
         LabeledButton(
@@ -39,10 +38,10 @@ fun componentTest()
             value = rad1
             )
         Spacer( Modifier.height( 5.dp ) )
-        LabeledField2(
+        LabeledField(
             label = "HL Input",
             value = rad2,
-            isEnabled = false
+            isEnabled = mutableStateOf(false)
             )
         Spacer( Modifier.height( 5.dp ) )
         LabeledField(
