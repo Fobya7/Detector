@@ -16,7 +16,8 @@ import com.s452635.detector.styling.*
 class GearFormState(
     val isOpen : MutableState<Boolean>,
     val gearSystem : MutableState<GearSystem>,
-    val gsAccepted : () -> Unit
+    val gsAccepted : () -> Unit,
+    val onClose : () -> Unit
 )
 
 @ExperimentalFoundationApi
@@ -24,7 +25,7 @@ class GearFormState(
 fun GearFormWindow(
     gearFormState : GearFormState
 ) = Window(
-    onCloseRequest = { gearFormState.isOpen.value = false },
+    onCloseRequest = gearFormState.onClose,
     visible = gearFormState.isOpen.value,
     title = "Gear Form",
     state = rememberWindowState(

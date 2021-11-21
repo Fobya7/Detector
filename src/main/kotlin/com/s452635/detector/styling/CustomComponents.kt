@@ -290,7 +290,7 @@ fun LabeledField2(
 }
 
 
-// region <} BUTTONS {>
+// region < } BUTTONS { >
 
 @Composable
 fun MyButton(
@@ -341,9 +341,10 @@ fun StereoButton(
     Button(
         content = { Text(
             text = text,
-            color = foregroundColor
+            color = foregroundColor,
+            fontSize = if( buttonSize == ButtonSize.Biggie ) 18.sp else 12.sp
             ) },
-        contentPadding = PaddingValues( 20.dp, 0.dp ),
+        contentPadding = PaddingValues( 10.dp, 0.dp ),
         enabled = isEnabled.value,
         onClick = ::onClick,
         colors = ButtonDefaults.buttonColors(
@@ -354,7 +355,7 @@ fun StereoButton(
         modifier = Modifier
             .height( when( buttonSize ) {
                 ButtonSize.Tiny -> 30.dp
-                ButtonSize.Biggie -> 50.dp
+                ButtonSize.Biggie -> 65.dp
                 })
         )
 }

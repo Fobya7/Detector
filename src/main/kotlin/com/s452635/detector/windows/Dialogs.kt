@@ -1,6 +1,6 @@
 package com.s452635.detector.windows
 
-import com.s452635.detector.HlOption
+import com.s452635.detector.HLOption
 import java.io.File
 import java.nio.file.Paths
 import javax.swing.JFileChooser
@@ -34,7 +34,7 @@ fun initFileChoosers()
     chooserHL.fileFilter = FileNameExtensionFilter("Acceptable", "txt", "hl")
     chooserGear.fileFilter = FileNameExtensionFilter("Acceptable", "gear" )
 }
-fun chooseHlInput() : Pair<HlOption, File?>?
+fun chooseHlInput() : Pair<HLOption, File?>?
 {
     val n = JOptionPane.showOptionDialog (
         null,
@@ -50,7 +50,7 @@ fun chooseHlInput() : Pair<HlOption, File?>?
 
     if( n == 1 )
     {
-        return Pair(HlOption.LiveGeneration, null )
+        return Pair(HLOption.LiveGeneration, null )
     }
 
     if( n == 0 )
@@ -62,12 +62,12 @@ fun chooseHlInput() : Pair<HlOption, File?>?
 
             if( it.name.endsWith( ".txt" ) )
             {
-                return Pair(HlOption.FromTxtFile, returnFile )
+                return Pair(HLOption.FromTxtFile, returnFile )
             }
 
             if( it.name.endsWith( ".hl" ) )
             {
-                return Pair(HlOption.FromHlFile, returnFile )
+                return Pair(HLOption.FromHlFile, returnFile )
             }
 
             JOptionPane.showMessageDialog(
