@@ -1,10 +1,7 @@
 package com.s452635.detector.styling
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -18,7 +15,7 @@ import androidx.compose.ui.window.application
 import com.s452635.detector.detecting.ScanQueue
 import kotlin.concurrent.thread
 
-@OptIn(ExperimentalFoundationApi::class)
+@ExperimentalFoundationApi
 @Composable
 fun componentTest()
 {
@@ -98,7 +95,27 @@ fun scanBoxTest()
     }
 }
 
-@ExperimentalFoundationApi
+@Composable
+fun stereoButtonTest()
+{
+    MainColumn {
+        Row {
+            StereoButton(
+                text = "HEWWO",
+                buttonPos = ButtonPosition.Left,
+                buttonSize = ButtonSize.Biggie
+                )
+            Spacer( Modifier.width( 5.dp ) )
+            StereoButton(
+                text = "FOLLOW",
+                isEnabled = mutableStateOf( false ),
+                buttonPos = ButtonPosition.Right,
+                buttonSize = ButtonSize.Biggie
+                )
+        }
+    }
+}
+
 fun main() = application {
     Window (
         onCloseRequest = ::exitApplication,
@@ -109,6 +126,6 @@ fun main() = application {
             )
         )
     {
-
+        stereoButtonTest()
     }
 }

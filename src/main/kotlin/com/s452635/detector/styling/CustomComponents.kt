@@ -10,9 +10,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -287,6 +289,9 @@ fun LabeledField2(
     }
 }
 
+
+// region <} BUTTONS {>
+
 @Composable
 fun MyButton(
     buttonText : String = "",
@@ -304,18 +309,65 @@ fun MyButton(
             backgroundColor = MyColors.Primary,
             disabledBackgroundColor = MyColors.DisabledMain
             ),
-        shape = when( buttonPos ) {
-            ButtonPosition.Lonely -> MyShapes.Uneven
-            ButtonPosition.Left -> MyShapes.UnevenLeft
-            ButtonPosition.Center -> MyShapes.Even
-            ButtonPosition.Right -> MyShapes.UnevenRight
-            },
+        shape = buttonShape( buttonPos ),
         modifier = Modifier
             .height( when( buttonSize ) {
                 ButtonSize.Tiny -> 30.dp
                 ButtonSize.Biggie -> 50.dp
                 })
         )
+}
+
+@Composable
+fun StereoButton(
+    text : String,
+    buttonPos : ButtonPosition = ButtonPosition.Lonely,
+    buttonSize : ButtonSize = ButtonSize.Tiny,
+    isEnabled : MutableState<Boolean> = mutableStateOf( true ),
+    onClickChecked : () -> Unit = {},
+    onClickUnchecked : () -> Unit = {}
+) {
+    val isChecked = remember { mutableStateOf( false ) }
+    val backgroundColor = if( isChecked.value ) MyColors.PrimaryDark else MyColors.Primary
+    val foregroundColor = if( isChecked.value ) MyColors.DisabledBack else Color.White
+
+    fun onClick()
+    {
+        if( isChecked.value ) onClickChecked()
+        else onClickUnchecked()
+        isChecked.value = !isChecked.value
+    }
+
+    Button(
+        content = { Text(
+            text = text,
+            color = foregroundColor
+            ) },
+        contentPadding = PaddingValues( 20.dp, 0.dp ),
+        enabled = isEnabled.value,
+        onClick = ::onClick,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = backgroundColor,
+            disabledBackgroundColor = MyColors.DisabledMain
+            ),
+        shape = buttonShape( buttonPos ),
+        modifier = Modifier
+            .height( when( buttonSize ) {
+                ButtonSize.Tiny -> 30.dp
+                ButtonSize.Biggie -> 50.dp
+                })
+        )
+}
+
+fun buttonShape( buttonPos: ButtonPosition ) : Shape
+{
+    return when( buttonPos )
+    {
+        ButtonPosition.Lonely -> MyShapes.Uneven
+        ButtonPosition.Left -> MyShapes.UnevenLeft
+        ButtonPosition.Center -> MyShapes.Even
+        ButtonPosition.Right -> MyShapes.UnevenRight
+    }
 }
 enum class ButtonPosition
 {
@@ -325,6 +377,9 @@ enum class ButtonSize
 {
     Biggie, Tiny
 }
+
+// endregion
+
 
 @Composable
 fun PatheticBorder(

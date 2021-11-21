@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 object MyColors
 {
     val Primary = Color( 252, 152, 3 )
+    val PrimaryDark = Color( 196, 118, 0 )
     val IncorrectRed = Color( 217, 120, 91 )
     val DisabledMain = Color( 143, 143, 143 )
     val DisabledBack = Color( 207, 207, 207 )
