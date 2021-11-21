@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -33,7 +32,7 @@ fun GeneratorWindow(
         enabled = !generatorState.isAppBusy.value,
         visible = generatorState.isOpen.value,
         state = rememberWindowState(
-            position = WindowPosition(Alignment.Center),
+            position = WindowPosition( 360.dp, 400.dp ),
             width = Dp.Unspecified, height = Dp.Unspecified
         )
     )

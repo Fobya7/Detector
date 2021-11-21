@@ -6,10 +6,9 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
@@ -34,9 +33,9 @@ fun ApplicationScope.DetectorWindow(
     onCloseRequest = ::exitApplication,
     title = "GearSym2000",
     enabled = !detectorState.isAppBusy.value,
-    state = WindowState(
-        position = WindowPosition( Alignment.Center ),
-        size = DpSize.Unspecified
+    state = rememberWindowState(
+        position = WindowPosition( 320.dp, 220.dp ),
+        width = Dp.Unspecified, height = Dp.Unspecified
         )
     )
 {
