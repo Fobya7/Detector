@@ -2,6 +2,7 @@ package com.s452635.detector.detecting
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.google.gson.Gson
 import com.s452635.detector.styling.NumberFieldManager
 
 data class GearSystem(
@@ -21,6 +22,11 @@ data class GearSystem(
     private fun calcMaxAGS( areaAngle : Double, detectorTick : Int ) : Double
     {
         return areaAngle / detectorTick
+    }
+
+    fun toFile() : String
+    {
+        return Gson().toJson( this )
     }
 
     companion object

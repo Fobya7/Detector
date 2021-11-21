@@ -75,8 +75,11 @@ fun GeneratorContentStandalone(
     fun checkIfCanGenerate()
     {
         canGenerate.value =
-            generatorState.fileValues.isTXTChecked.value ||
-            generatorState.fileValues.isHLChecked.value
+            ( generatorState.fileValues.isTXTChecked.value ||
+              generatorState.fileValues.isHLChecked.value ) &&
+            generatorState.fileValues.fileName.value.isNotBlank() &&
+            linesField.isCorrect &&
+            generatorState.fileValues.gs.value != null
     }
 
     MainColumn {
@@ -87,12 +90,14 @@ fun GeneratorContentStandalone(
             isEnabled = mutableStateOf(true),
             buttonFraction = 0.5F
             )
+        /*
         Spacer( Modifier.height( 5.dp ) )
         LabeledButton(
             buttonText = "Directory",
             buttonFraction = 0.5F,
             onClick = generatorState.onClickDir
             )
+        */
 
         Spacer( Modifier.height( 15.dp ) )
         LabeledField(
@@ -106,7 +111,11 @@ fun GeneratorContentStandalone(
             label = linesField.label,
             tooltipText = linesField.tooltip,
             value = linesField.field,
-            onValueChange = { linesField.onValueChange(); checkIfCanGenerate() },
+            onValueChange = {
+                linesField.onValueChange()
+                generatorState.fileValues.fileLines.value = linesField.number
+                checkIfCanGenerate()
+                },
             correctionChecking = { linesField.isCorrect },
             labelFraction = 0.5F
             )

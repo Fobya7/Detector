@@ -78,6 +78,11 @@ class GenValues( private val gearSystem : GearSystem = defaultGearSystem )
     {
         return Pair( scA.areaType.value, scB.areaType.value )
     }
+    fun snapStr() : String
+    {
+        val snap = snap()
+        return "${snap.first}${snap.second}"
+    }
 }
 
 enum class Area

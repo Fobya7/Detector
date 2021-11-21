@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import com.s452635.detector.detecting.DetectorValues
 import com.s452635.detector.styling.*
 
 class DetectorState(
@@ -24,7 +25,8 @@ class DetectorState(
     val isGSEnabled : MutableState<Boolean>,
     val onClickGS : () -> Unit,
     val menuCanOpenGen : MutableState<Boolean>,
-    val menuOpenGen : () -> Unit
+    val menuOpenGen : () -> Unit,
+    val detValues : MutableState<DetectorValues>
 )
 
 @Composable
@@ -49,36 +51,12 @@ fun ApplicationScope.DetectorWindow(
             )
         }
     }
-    DetectorContent(
-        isStartEnabled = detectorState.isStartEnabled,
-        onClickStartChecked = detectorState.onClickStartChecked,
-        onClickStartUnchecked = detectorState.onClickStartUnchecked,
-        isInitEnabled = detectorState.isInitEnabled,
-        onClickInitChecked = detectorState.onClickInitChecked,
-        onClickInitUnchecked = detectorState.onClickInitUnchecked,
-        labelHL = detectorState.labelHL,
-        isHLEnabled = detectorState.isHLEnabled,
-        onClickHL = detectorState.onClickHL,
-        labelGS = detectorState.labelGS,
-        isGSEnabled = detectorState.isGSEnabled,
-        onClickGS = detectorState.onClickGS
-    )
+    DetectorContent( detectorState )
 }
 
 @Composable
 fun DetectorContent(
-    isStartEnabled : MutableState<Boolean>,
-    onClickStartChecked : () -> Unit,
-    onClickStartUnchecked : () -> Unit,
-    isInitEnabled : MutableState<Boolean>,
-    onClickInitChecked : () -> Unit,
-    onClickInitUnchecked : () -> Unit,
-    labelHL : MutableState<String>,
-    isHLEnabled : MutableState<Boolean>,
-    onClickHL : () -> Unit,
-    labelGS : MutableState<String>,
-    isGSEnabled : MutableState<Boolean>,
-    onClickGS : () -> Unit
+    detectorState : DetectorState
 ) {
     MainColumn {
 
@@ -87,39 +65,44 @@ fun DetectorContent(
                 text = "START",
                 buttonPos = ButtonPosition.Left,
                 buttonSize = ButtonSize.Biggie,
-                isEnabled = isStartEnabled,
-                onClickChecked = onClickStartChecked,
-                onClickUnchecked = onClickStartUnchecked
+                isEnabled = detectorState.isStartEnabled,
+                onClickChecked = detectorState.onClickStartChecked,
+                onClickUnchecked = detectorState.onClickStartUnchecked
             )
             Spacer( Modifier.width( 5.dp ) )
             StereoButton(
                 text = "INIT",
                 buttonPos = ButtonPosition.Right,
                 buttonSize = ButtonSize.Biggie,
-                isEnabled = isInitEnabled,
-                onClickChecked = onClickInitChecked,
-                onClickUnchecked = onClickInitUnchecked
+                isEnabled = detectorState.isInitEnabled,
+                onClickChecked = detectorState.onClickInitChecked,
+                onClickUnchecked = detectorState.onClickInitUnchecked
             )
             Spacer( Modifier.width( 5.dp ) )
             Column()
             {
                 LabeledButton(
                     buttonText = "HL Input",
-                    onClick = onClickHL,
-                    label = labelHL,
-                    isEnabled = isHLEnabled,
+                    onClick = detectorState.onClickHL,
+                    label = detectorState.labelHL,
+                    isEnabled = detectorState.isHLEnabled,
                     buttonFraction = 0.5F
                     )
                 Spacer( Modifier.height( 5.dp ) )
                 LabeledButton(
                     buttonText = "Gear System",
-                    onClick = onClickGS,
-                    label = labelGS,
-                    isEnabled = isGSEnabled,
+                    onClick = detectorState.onClickGS,
+                    label = detectorState.labelGS,
+                    isEnabled = detectorState.isGSEnabled,
                     buttonFraction = 0.5F
                     )
             }
         } }
+
+        Spacer( Modifier.height( 10.dp ) )
+        DippingField(
+            detectorState.detValues.value.buildString()
+        )
 
     }
 }

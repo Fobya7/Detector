@@ -4,9 +4,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
-import com.s452635.detector.detecting.FileValues
-import com.s452635.detector.detecting.GearSystem
-import com.s452635.detector.detecting.GenValues
+import com.google.gson.Gson
+import com.s452635.detector.detecting.*
 import com.s452635.detector.windows.*
 import java.io.File
 import java.lang.Thread.sleep
@@ -33,6 +32,7 @@ private class ApplicationState
     val fileGS = mutableStateOf<File?>( null )
     val gearSystem = mutableStateOf( GearSystem() )
     val fileValues = FileValues()
+    val detectorValues = mutableStateOf( DetectorValues( gearSystem.value ) )
 
     // endregion
 
@@ -64,7 +64,8 @@ private class ApplicationState
         detectorSt.value.menuCanOpenGen.value = false
         generatorSt.value.isAlone.value = false
 
-        mainThread()
+        if( inputOptionHL.value == HLOption.LiveGeneration ) mainThread()
+        else fileThread()
     }
     fun abandonProgram()
     {
@@ -139,7 +140,54 @@ private class ApplicationState
 
     fun otherThread()
     {
-        sleep( 2000 )
+        val newFile = File( currentWorkingDirectory, "${fileValues.fileName.value}.txt" )
+        generator.value = GenValues( gearSystem.value )
+
+        val genThread = Thread {
+            newFile.appendText( gearSystem.value.toFile() )
+
+            for( x in 1..fileValues.fileLines.value!! )
+            {
+                newFile.appendText( "\n" )
+                for( y in 1..40 )
+                {
+                    generator.value.step()
+                    newFile.appendText( generator.value.snapStr() )
+                }
+            }
+
+            programStopGenerating()
+        }
+
+        newFile.createNewFile()
+        if( !newFile.canWrite() ) { println( "can't write" ); return }
+
+        genThread.start()
+    }
+
+    fun fileThread()
+    {
+        Thread { fileHL.value?.bufferedReader().use { bufferedReader ->
+
+            gearSystem.value = Gson().fromJson( bufferedReader?.readLine(), GearSystem::class.java )
+            detectorValues.value = DetectorValues( gearSystem.value )
+
+            var line = bufferedReader?.readLine()
+            var first : Area? = null
+            while( line != null )
+            {
+                line = bufferedReader?.readLine()
+                line?.forEach {
+                    if( first == null ) { first = Area.valueOf( it.toString() ) }
+                    else
+                    {
+                        detectorValues.value.update( Pair( first!!, Area.valueOf( it.toString() ) ) )
+                        sleep( gearSystem.value.detectorTick.toLong() )
+                        first = null
+                    }
+                }
+            }
+        } }.start()
     }
 
     // endregion
@@ -178,6 +226,7 @@ private class ApplicationState
             ProgramState.Init ->
             {
                 showGearForm()
+                generatorSt.value.fileValues.gs.value = gearSystem.value
                 checkIfCanInitProgram()
             }
             else -> { /* TODO : show gs in a window */ }
@@ -242,7 +291,8 @@ private class ApplicationState
         isGSEnabled = mutableStateOf( true ),
         onClickGS = ::onClickGS,
         menuCanOpenGen = mutableStateOf(true),
-        menuOpenGen = ::showGenerator
+        menuOpenGen = ::showGenerator,
+        detValues = detectorValues
     )
 
     // endregion
@@ -269,7 +319,7 @@ private class ApplicationState
         isAlone = mutableStateOf( true ),
         onClose = ::hideGenerator,
         genValues = generator,
-        onClickGS = ::initGearForm,
+        onClickGS = ::onClickGS,
         onClickDir = ::chooseDirToSave,
         onClickGenerate = ::programStartGenerating,
         fileValues = fileValues,
