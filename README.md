@@ -23,12 +23,14 @@
 <img width="876" alt="det8" src="https://user-images.githubusercontent.com/66226017/142781477-7d4d2ece-610b-4724-9c59-afb8ae47cdfe.png">
 
 ## Example: Generator Working Live
-feature not yet connected
+(feature not yet connected)
 
 <img width="876" alt="live1" src="https://user-images.githubusercontent.com/66226017/142781515-c9f8418d-ed0c-4e59-b1bb-c5b9eec3d722.png">
 <img width="876" alt="live2" src="https://user-images.githubusercontent.com/66226017/142781518-927ea0ac-a165-4821-9fc8-ef19feb75060.png">
 <img width="876" alt="live3" src="https://user-images.githubusercontent.com/66226017/142781520-0c77cd3b-23b1-4318-91c3-87ed6a123a23.png">
 <img width="876" alt="live4" src="https://user-images.githubusercontent.com/66226017/142781522-67a61f01-c4cd-4cfd-9a92-17ec858113c9.png">
 <img width="876" alt="live5" src="https://user-images.githubusercontent.com/66226017/142781526-b209e2bb-0410-406e-833d-53474a3d8341.png">
+
+Watch generator:
 https://user-images.githubusercontent.com/66226017/142781560-c6903c57-3867-423d-8d5f-635c4111aa95.mov
 
