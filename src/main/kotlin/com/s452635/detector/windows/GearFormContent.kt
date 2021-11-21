@@ -14,10 +14,10 @@ import com.s452635.detector.detecting.GearSystemBuilder
 import com.s452635.detector.styling.*
 
 class GearFormState(
-    val isOpen : MutableState<Boolean>,
-    val gearSystem : MutableState<GearSystem>,
-    val gsAccepted : () -> Unit,
-    val onClose : () -> Unit
+    val isVisible : MutableState<Boolean>,
+    val onClose : () -> Unit,
+    val onClickAccept : () -> Unit,
+    val gearSystem : MutableState<GearSystem>
 )
 
 @ExperimentalFoundationApi
@@ -26,7 +26,7 @@ fun GearFormWindow(
     gearFormState : GearFormState
 ) = Window(
     onCloseRequest = gearFormState.onClose,
-    visible = gearFormState.isOpen.value,
+    visible = gearFormState.isVisible.value,
     title = "Gear Form",
     state = rememberWindowState(
         position = WindowPosition( 560.dp, 200.dp ),
@@ -35,16 +35,16 @@ fun GearFormWindow(
     )
 {
     GearFormContent(
-        gearSystem = gearFormState.gearSystem,
-        gsAccepted = gearFormState.gsAccepted
+        onClickAccept = gearFormState.onClickAccept,
+        gearSystem = gearFormState.gearSystem
         )
 }
 
 @ExperimentalFoundationApi
 @Composable
 fun GearFormContent(
-    gearSystem : MutableState<GearSystem>,
-    gsAccepted : () -> Unit
+    onClickAccept : () -> Unit,
+    gearSystem : MutableState<GearSystem>
 ) {
     val gsb by remember { mutableStateOf( GearSystemBuilder() ) }
 
@@ -105,7 +105,7 @@ fun GearFormContent(
                 buttonText = "accept",
                 buttonPos = ButtonPosition.Lonely,
                 isEnabled = gsb.isCorrect,
-                onClick = { gearSystem.value = gsb.build(); gsAccepted() }
+                onClick = { gearSystem.value = gsb.build(); onClickAccept() }
                 )
         }
 

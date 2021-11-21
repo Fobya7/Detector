@@ -43,46 +43,43 @@ private class ApplicationState
     val programState = mutableStateOf( ProgramState.Init )
     fun pauseProgram()
     {
-        if( programState.value == ProgramState.Working )
-            programState.value = ProgramState.Paused
+        if( programState.value != ProgramState.Working ) { return }
+
+        programState.value = ProgramState.Paused
     }
     fun unpauseProgram()
     {
-        if( programState.value == ProgramState.Paused )
-            programState.value = ProgramState.Working
+        if( programState.value != ProgramState.Paused ) { return }
+
+        programState.value = ProgramState.Working
     }
-    fun startProgram()
+    fun initProgram()
     {
-        if( programState.value == ProgramState.Init )
-            programState.value = ProgramState.Working
+        if( programState.value != ProgramState.Init ) { return }
+
+        programState.value = ProgramState.Paused
+        detectorSt.value.isStartEnabled.value = true
+
+        mainThread()
     }
     fun abandonProgram()
     {
-        // TODO : ask to stop
+        if( programState.value == ProgramState.Paused ) { return }
+
+        // TODO : ask if sure to stop
         // TODO : clearing variables, probably
-        if( programState.value == ProgramState.Paused )
-            programState.value = ProgramState.Init
+        programState.value = ProgramState.Init
     }
 
     val inputOptionHL = mutableStateOf( HLOption.None )
     val inputOptionGS = mutableStateOf( GSOption.None )
 
-    val canToggleStart = mutableStateOf( false )
-    fun checkIfCanToggleStart()
-    {
-        canToggleStart.value = programState.value != ProgramState.Init
-    }
-
     val canInitProgram = mutableStateOf( false )
     fun checkIfCanInitProgram()
     {
-        canInitProgram.value = inputOptionHL.value != HLOption.None && inputOptionGS.value != GSOption.None
-    }
-    fun programTryWorking()
-    {
-        if( programState.value != ProgramState.Init ) { return }
-
-        // isDBStartEnabled.value = true
+        canInitProgram.value =
+            inputOptionHL.value != HLOption.None &&
+            inputOptionGS.value != GSOption.None
     }
 
     // endregion
@@ -96,69 +93,65 @@ private class ApplicationState
 
         val actualTick = floor( gearSystem.value.detectorTick / 2.0 ).toLong()
         val genThread = Thread {
-            while(programState.value == ProgramState.Working)
+            while( programState.value != ProgramState.Init )
             {
                 sleep( actualTick )
-                generator.value.step()
+                if( programState.value == ProgramState.Working )
+                {
+                    generator.value.step()
 
-                // TODO : use those values
-                sleep( actualTick )
-                println(generator.value.snap())
+                    // TODO : use those values
+                    sleep(actualTick)
+                    println(generator.value.snap())
+                }
             }
         }
 
         showGenerator()
-        startProgram()
+        initProgram()
         genThread.start()
     }
 
     // endregion
 
-    // region detector
+    // region detector window
 
     fun onClickHL()
     {
         fun hlInputChoice()
         {
+            makeBusy()
             val hlInput = chooseHlInput() ?: return
             inputOptionHL.value = hlInput.first
             fileHL.value = hlInput.second
 
             updateButtonLabels()
             checkIfCanInitProgram()
+            makeNotBusy()
         }
 
         when( programState.value )
         {
-            ProgramState.Init ->
+            ProgramState.Init -> { hlInputChoice() }
+            else -> when( inputOptionHL.value )
             {
-                makeBusy()
-                hlInputChoice()
-                makeNotBusy()
+                HLOption.LiveGeneration -> { showGenerator() }
+                HLOption.FromHlFile, HLOption.FromTxtFile -> { /* TODO : show file */ }
+                else -> {}
             }
-            else -> {}
         }
-        updateButtonLabels()
     }
     fun onClickGS()
     {
-        fun gsAccepted()
-        {
-            inputOptionGS.value = GSOption.Custom
-            updateButtonLabels()
-            hideGearForm()
-        }
-
         when( programState.value )
         {
             ProgramState.Init ->
             {
                 showGearForm()
+                checkIfCanInitProgram()
             }
-            else -> {}
+            else -> { /* TODO : show gs in a window */ }
         }
-
-        checkIfCanInitProgram()
     }
     fun updateButtonLabels()
     {
@@ -200,17 +193,18 @@ private class ApplicationState
         updateHlLabel()
         updateGsLabel()
         updateGsButton()
+        checkIfCanInitProgram()
     }
 
     val detectorSt = mutableStateOf( detectorState() )
     private fun detectorState() = DetectorState (
         isEnabled = isAvailable,
-        isStartEnabled = canToggleStart,
+        isStartEnabled = mutableStateOf( false ),
         onClickStartChecked = ::pauseProgram,
         onClickStartUnchecked = ::unpauseProgram,
         isInitEnabled = canInitProgram,
-        onClickInitChecked = ::startProgram,
-        onClickInitUnchecked = ::abandonProgram,
+        onClickInitChecked = ::abandonProgram,
+        onClickInitUnchecked = ::initProgram,
         labelHL = mutableStateOf("none"),
         isHLEnabled = mutableStateOf( true ),
         onClickHL = ::onClickHL,
@@ -221,27 +215,30 @@ private class ApplicationState
 
     // endregion
 
-    // region generator
+    // region generator window
 
-    val isGeneratorVisible = mutableStateOf( false )
-    fun showGenerator() { isGeneratorVisible.value = true }
-    fun hideGenerator() { isGeneratorVisible.value = false }
-    fun initGenerator()
-    {
-        showGenerator()
-        // TODO initiating generator stuff
-    }
+    fun showGenerator() { generatorSt.value.isVisible.value = true }
+    fun hideGenerator() { generatorSt.value.isVisible.value = false }
 
     val generatorSt = mutableStateOf( generatorState() )
     private fun generatorState() = GeneratorState (
-        isAppBusy = isAvailable,
-        isOpen = isGeneratorVisible,
+        isEnabled = isAvailable,
+        isVisible = mutableStateOf( false ),
+        onClose = ::hideGenerator,
         genValues = generator
     )
 
     // endregion
 
     // region gear form
+
+    fun onClickGFAccept()
+    {
+        // TODO : there will be option, to load from file inside gear form
+        inputOptionGS.value = GSOption.Custom
+        updateButtonLabels()
+        hideGearForm()
+    }
 
     val isGearFormVisible = mutableStateOf( false )
     fun showGearForm()
@@ -257,14 +254,13 @@ private class ApplicationState
 
     val gearFormState = mutableStateOf( gearFormState() )
     private fun gearFormState() = GearFormState (
-        isOpen = isGearFormVisible,
+        isVisible = isGearFormVisible,
         gearSystem = gearSystem,
         onClose = ::hideGearForm,
-        gsAccepted = {} // gsAccepted()
+        onClickAccept = ::onClickGFAccept
     )
 
     // endregion
-
 }
 
 enum class HLOption { None, LiveGeneration, FromTxtFile, FromHlFile }

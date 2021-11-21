@@ -17,8 +17,9 @@ import com.s452635.detector.styling.MainColumn
 import com.s452635.detector.styling.dippingField
 
 class GeneratorState(
-    val isAppBusy : MutableState<Boolean>,
-    val isOpen : MutableState<Boolean>,
+    val isEnabled : MutableState<Boolean>,
+    val isVisible : MutableState<Boolean>,
+    val onClose : () -> Unit,
     val genValues : MutableState<GenValues>
 )
 
@@ -27,23 +28,23 @@ fun GeneratorWindow(
     generatorState : GeneratorState
 ) {
     Window(
-        onCloseRequest = {},
+        onCloseRequest = generatorState.onClose,
         title = "The Generator",
-        enabled = !generatorState.isAppBusy.value,
-        visible = generatorState.isOpen.value,
+        enabled = generatorState.isEnabled.value,
+        visible = generatorState.isVisible.value,
         state = rememberWindowState(
             position = WindowPosition( 360.dp, 400.dp ),
             width = Dp.Unspecified, height = Dp.Unspecified
         )
     )
     {
-        GeneratorContent( generatorState.genValues )
+        GeneratorContent( generatorState )
     }
 }
 
 @Composable
 fun GeneratorContent(
-    genValues : MutableState<GenValues>
+    generatorState : GeneratorState
 ) {
     MainColumn {
         LabeledButton(
@@ -54,6 +55,6 @@ fun GeneratorContent(
             buttonFraction = 0.5F
             )
         Spacer( Modifier.height( 10.dp ) )
-        dippingField( genValues.value.buildString() )
+        dippingField( generatorState.genValues.value.buildString() )
     }
 }

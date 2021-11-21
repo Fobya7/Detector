@@ -40,6 +40,7 @@ fun ApplicationScope.DetectorWindow(
 {
     MenuBar {
         Menu( "File" ) {
+            // TODO : make sometimes inaccessible
             // Item( "open generator", onClick = detectorState.openGen )
         }
     }
